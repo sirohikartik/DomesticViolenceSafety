@@ -1,18 +1,19 @@
 # Create a Domestic Violence Safety Platform
 
+## Initial draft
 
 ## Requirment Analysis
 
 ### Functional Requirements 
 
-## Features
+## Features to think of
 1. Ability to report any episode of domestic violence
 2. Provide emergency helpline
 3. Maybe record audio during episode by permission of the user?
 4. Use AI to record audio locally and flag potential episodes??
 5. With permission of user report to concerned authorities
 
-## Technicals
+## Technicals to ponder
 1. Have an app? (yes)
 2. Ability to login or signup
 3. Give permission to record audio
@@ -22,7 +23,7 @@
 7. Authorities also use the app
 so we have the normal victims and people from authority that u can reach out to in case of issues that u are facing and it analyzes live audio(locally) and looks for signs of episodes or issues and reports to an authority member who is reponsible for the block/area. 
 
-## Specifications
+## Specifications to take into account
 1. Backend infrastructure for user handling
 2. Local ai system for privacy of audio  
 3. Flag potential episodes -- collect data for a specific amount of time or look for patterns also give that pattern statistic to the authority.
@@ -30,7 +31,7 @@ so we have the normal victims and people from authority that u can reach out to 
 ###### This can be borderline spying but we have to keep it local so it doesn't become a cause for concern, the private nature of the application/software must be maintained.
 
 
-## Technical Specifications
+## Technical Specifications to be used
 
 1. Neon DB database
 2. FastAPI/ Golang backend
