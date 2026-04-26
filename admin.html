@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Panel</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #0f1117;
+      color: #e0e0e0;
+      min-height: 100vh;
+    }
+
+    #login-screen {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    .login-card {
+      background: #1a1d27;
+      border: 1px solid #2a2d3e;
+      border-radius: 12px;
+      padding: 40px 36px;
+      width: 360px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+
+    .login-card h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; color: #fff; }
+    .login-card p  { font-size: 13px; color: #888; margin-bottom: 28px; }
+
+    label {
+      display: block;
+      font-size: 12px;
+      color: #aaa;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    input[type="text"], input[type="password"], input[type="email"] {
+      width: 100%;
+      padding: 10px 14px;
+      background: #0f1117;
+      border: 1px solid #2a2d3e;
+      border-radius: 8px;
+      color: #e0e0e0;
+      font-size: 14px;
+      margin-bottom: 4px;
+      outline: none;
+      transition: border 0.2s;
+    }
+
+    input:focus { border-color: #5c6bc0; }
+    input.invalid { border-color: #ef5350 !important; }
+
+    .field-error {
+      font-size: 11px;
+      color: #ef5350;
+      margin-bottom: 10px;
+      min-height: 14px;
+      display: block;
+    }
+
+    .field-hint {
+      font-size: 11px;
+      color: #555;
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 11px;
+      background: #5c6bc0;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-top: 8px;
+    }
+
+    .btn:hover { background: #4a5ab0; }
+
+    .error-msg {
+      color: #ef5350;
+      font-size: 13px;
+      margin-top: 12px;
+      text-align: center;
+      display: none;
+    }
+
+    #dashboard { display: none; }
+
+    .topbar {
+      background: #1a1d27;
+      border-bottom: 1px solid #2a2d3e;
+      padding: 14px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .topbar h2 { font-size: 16px; font-weight: 700; color: #fff; }
+
+    .logout-btn {
+      padding: 7px 16px;
+      background: transparent;
+      border: 1px solid #ef5350;
+      color: #ef5350;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .logout-btn:hover { background: #ef5350; color: #fff; }
+
+    .tabs {
+      display: flex;
+      gap: 4px;
+      padding: 20px 28px 0;
+      border-bottom: 1px solid #2a2d3e;
+    }
+
+    .tab {
+      padding: 10px 20px;
+      border-radius: 8px 8px 0 0;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      color: #888;
+      border: 1px solid transparent;
+      border-bottom: none;
+      transition: all 0.2s;
+    }
+
+    .tab.active {
+      background: #1a1d27;
+      color: #fff;
+      border-color: #2a2d3e;
+      border-bottom: 1px solid #1a1d27;
+      margin-bottom: -1px;
+    }
+
+    .tab:hover:not(.active) { color: #ccc; }
+
+    .content { padding: 28px; }
+
+    .section { display: none; }
+    .section.active { display: block; }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    .section-header h3 { font-size: 15px; font-weight: 700; color: #fff; }
+
+    .refresh-btn {
+      padding: 7px 14px;
+      background: #2a2d3e;
+      border: 1px solid #3a3d4e;
+      color: #ccc;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .refresh-btn:hover { background: #3a3d4e; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+
+    th {
+      background: #2a2d3e;
+      color: #aaa;
+      padding: 10px 14px;
+      text-align: left;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.5px;
+    }
+
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid #1e2130;
+      color: #ccc;
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    tr:hover td { background: #1e2130; }
+
+    .status-badge {
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .status-initialized { background: #1a237e22; color: #7986cb; border: 1px solid #3949ab44; }
+    .status-assigned    { background: #1b5e2022; color: #66bb6a;  border: 1px solid #2e7d3244; }
+    .status-resolved    { background: #33691e22; color: #aed581;  border: 1px solid #558b2f44; }
+
+    .edit-btn {
+      padding: 5px 12px;
+      background: #2a2d3e;
+      border: 1px solid #3a3d4e;
+      color: #ccc;
+      border-radius: 5px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .edit-btn:hover { background: #5c6bc0; color: #fff; border-color: #5c6bc0; }
+
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: #1a1d27;
+      border: 1px solid #2a2d3e;
+      border-radius: 12px;
+      padding: 28px;
+      width: 440px;
+      max-height: 85vh;
+      overflow-y: auto;
+    }
+
+    .modal h3 { font-size: 15px; font-weight: 700; margin-bottom: 20px; color: #fff; }
+
+    .modal-actions { display: flex; gap: 10px; margin-top: 10px; }
+    .modal-actions .btn { width: auto; flex: 1; margin-top: 0; }
+
+    .cancel-btn {
+      flex: 1;
+      padding: 11px;
+      background: transparent;
+      border: 1px solid #2a2d3e;
+      color: #aaa;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .cancel-btn:hover { background: #2a2d3e; }
+
+    .loading { color: #888; font-size: 13px; padding: 20px 0; text-align: center; }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      z-index: 999;
+      animation: fadeIn 0.2s ease;
+      max-width: 380px;
+      line-height: 1.5;
+    }
+
+    .toast.success { background: #1b5e20; color: #a5d6a7; border: 1px solid #2e7d32; }
+    .toast.error   { background: #b71c1c; color: #ffcdd2; border: 1px solid #c62828; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <h1>🛡 Admin Panel</h1>
+    <p>Domestic Violence Response System</p>
+    <label>Username</label>
+    <input type="text" id="username" placeholder="admin" />
+    <label>Password</label>
+    <input type="password" id="password" placeholder="••••••"
+           onkeydown="if(event.key==='Enter') login()" />
+    <button class="btn" onclick="login()">Sign In</button>
+    <div class="error-msg" id="error-msg">Invalid credentials</div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard">
+  <div class="topbar">
+    <h2>🛡 Admin Dashboard</h2>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('incidents')">Incidents</div>
+    <div class="tab" onclick="switchTab('customers')">Customers</div>
+    <div class="tab" onclick="switchTab('officers')">Officers</div>
+  </div>
+
+  <div class="content">
+    <div class="section active" id="section-incidents">
+      <div class="section-header">
+        <h3>All Incidents</h3>
+        <button class="refresh-btn" onclick="loadIncidents()">↻ Refresh</button>
+      </div>
+      <div id="incidents-table"><div class="loading">Loading...</div></div>
+    </div>
+
+    <div class="section" id="section-customers">
+      <div class="section-header">
+        <h3>All Customers</h3>
+        <button class="refresh-btn" onclick="loadCustomers()">↻ Refresh</button>
+      </div>
+      <div id="customers-table"><div class="loading">Loading...</div></div>
+    </div>
+
+    <div class="section" id="section-officers">
+      <div class="section-header">
+        <h3>All Officers</h3>
+        <button class="refresh-btn" onclick="loadOfficers()">↻ Refresh</button>
+      </div>
+      <div id="officers-table"><div class="loading">Loading...</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT INCIDENT MODAL -->
+<div class="modal-overlay" id="modal-incident">
+  <div class="modal">
+    <h3>Edit Incident</h3>
+    <input type="hidden" id="edit-incident-id" />
+
+    <label>Status *</label>
+    <input type="text" id="edit-incident-status" placeholder="initialized / assigned / resolved" />
+    <span class="field-error" id="err-incident-status"></span>
+
+    <label>Officer ID</label>
+    <input type="text" id="edit-incident-officer" placeholder="Leave blank to keep unchanged" />
+    <span class="field-hint">Must be a valid numeric officer ID. Check Officers tab.</span>
+    <span class="field-error" id="err-incident-officer"></span>
+
+    <label>Description *</label>
+    <input type="text" id="edit-incident-desc" placeholder="Description" />
+    <span class="field-error" id="err-incident-desc"></span>
+
+    <label>Location *</label>
+    <input type="text" id="edit-incident-location" placeholder="Location" />
+    <span class="field-error" id="err-incident-location"></span>
+
+    <div class="modal-actions">
+      <button class="cancel-btn" onclick="closeModal('modal-incident')">Cancel</button>
+      <button class="btn" onclick="saveIncident()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT CUSTOMER MODAL -->
+<div class="modal-overlay" id="modal-customer">
+  <div class="modal">
+    <h3>Edit Customer</h3>
+    <input type="hidden" id="edit-customer-id" />
+
+    <label>Email *</label>
+    <input type="text" id="edit-customer-email" placeholder="user@example.com" />
+    <span class="field-error" id="err-customer-email"></span>
+
+    <label>Phone * (10 digits)</label>
+    <input type="text" id="edit-customer-phone" placeholder="9876543210" maxlength="10" />
+    <span class="field-error" id="err-customer-phone"></span>
+
+    <label>Address *</label>
+    <input type="text" id="edit-customer-address" placeholder="Full address" />
+    <span class="field-error" id="err-customer-address"></span>
+
+    <div class="modal-actions">
+      <button class="cancel-btn" onclick="closeModal('modal-customer')">Cancel</button>
+      <button class="btn" onclick="saveCustomer()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT OFFICER MODAL -->
+<div class="modal-overlay" id="modal-officer">
+  <div class="modal">
+    <h3>Edit Officer</h3>
+    <input type="hidden" id="edit-officer-id" />
+
+    <label>Email *</label>
+    <input type="text" id="edit-officer-email" placeholder="officer@pd.gov" />
+    <span class="field-error" id="err-officer-email"></span>
+
+    <label>Phone * (10 digits)</label>
+    <input type="text" id="edit-officer-phone" placeholder="9876543210" maxlength="10" />
+    <span class="field-error" id="err-officer-phone"></span>
+
+    <label>Location *</label>
+    <input type="text" id="edit-officer-location" placeholder="Precinct / Area" />
+    <span class="field-error" id="err-officer-location"></span>
+
+    <label>Department *</label>
+    <input type="text" id="edit-officer-dept" placeholder="e.g. Homicide, Cybercrime" />
+    <span class="field-error" id="err-officer-dept"></span>
+
+    <div class="modal-actions">
+      <button class="cancel-btn" onclick="closeModal('modal-officer')">Cancel</button>
+      <button class="btn" onclick="saveOfficer()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const BASE = "http://localhost:8000";
+  let TOKEN = null;
+
+  // ── Toast ─────────────────────────────────────────────────────────────────
+
+  function showToast(msg, type = "success") {
+    const existing = document.querySelector(".toast");
+    if (existing) existing.remove();
+    const t = document.createElement("div");
+    t.className = `toast ${type}`;
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 4000);
+  }
+
+  // ── Validation helpers ────────────────────────────────────────────────────
+
+  function setError(id, msg) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = msg;
+    // highlight the input
+    const inputId = id.replace("err-", "edit-").replace(/-(\w+)$/, (_, g) => `-${g}`);
+    const input = document.getElementById(inputId);
+    if (input) input.classList.toggle("invalid", !!msg);
+  }
+
+  function clearErrors(...ids) {
+    ids.forEach(id => setError(id, ""));
+  }
+
+  function isValidEmail(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  }
+
+  function isValidPhone(phone) {
+    return /^\d{10}$/.test(phone);
+  }
+
+  const VALID_STATUSES = ["initialized", "assigned", "resolved"];
+
+  function validateIncident(status, officer_raw, description, location) {
+    let valid = true;
+    clearErrors("err-incident-status", "err-incident-officer", "err-incident-desc", "err-incident-location");
+
+    if (!status) {
+      setError("err-incident-status", "Status is required.");
+      valid = false;
+    } else if (!VALID_STATUSES.includes(status.toLowerCase())) {
+      setError("err-incident-status", "Status must be: initialized, assigned, or resolved.");
+      valid = false;
+    }
+
+    if (officer_raw) {
+      if (isNaN(parseInt(officer_raw)) || parseInt(officer_raw) <= 0) {
+        setError("err-incident-officer", "Officer ID must be a positive number.");
+        valid = false;
+      }
+    }
+
+    if (!description || description.trim().length < 5) {
+      setError("err-incident-desc", "Description is required (min 5 characters).");
+      valid = false;
+    }
+
+    if (!location || location.trim().length < 3) {
+      setError("err-incident-location", "Location is required (min 3 characters).");
+      valid = false;
+    }
+
+    return valid;
+  }
+
+  function validateCustomer(email, phone, address) {
+    let valid = true;
+    clearErrors("err-customer-email", "err-customer-phone", "err-customer-address");
+
+    if (!email) {
+      setError("err-customer-email", "Email is required.");
+      valid = false;
+    } else if (!isValidEmail(email)) {
+      setError("err-customer-email", "Enter a valid email address (e.g. user@example.com).");
+      valid = false;
+    }
+
+    if (!phone) {
+      setError("err-customer-phone", "Phone is required.");
+      valid = false;
+    } else if (!isValidPhone(phone)) {
+      setError("err-customer-phone", "Phone must be exactly 10 digits, numbers only.");
+      valid = false;
+    }
+
+    if (!address || address.trim().length < 5) {
+      setError("err-customer-address", "Address is required (min 5 characters).");
+      valid = false;
+    }
+
+    return valid;
+  }
+
+  function validateOfficer(email, phone, location, department) {
+    let valid = true;
+    clearErrors("err-officer-email", "err-officer-phone", "err-officer-location", "err-officer-dept");
+
+    if (!email) {
+      setError("err-officer-email", "Email is required.");
+      valid = false;
+    } else if (!isValidEmail(email)) {
+      setError("err-officer-email", "Enter a valid email address.");
+      valid = false;
+    }
+
+    if (!phone) {
+      setError("err-officer-phone", "Phone is required.");
+      valid = false;
+    } else if (!isValidPhone(phone)) {
+      setError("err-officer-phone", "Phone must be exactly 10 digits, numbers only.");
+      valid = false;
+    }
+
+    if (!location || location.trim().length < 3) {
+      setError("err-officer-location", "Location is required (min 3 characters).");
+      valid = false;
+    }
+
+    if (!department || department.trim().length < 2) {
+      setError("err-officer-dept", "Department is required (min 2 characters).");
+      valid = false;
+    }
+
+    return valid;
+  }
+
+  // ── Friendly API error messages ───────────────────────────────────────────
+
+  function friendlyError(detail, ctx = {}) {
+    if (!detail) return "Something went wrong. Please try again.";
+    if (detail === "Officer not found")
+      return `Officer ID "${ctx.officer_id}" does not exist. Check the Officers tab for valid IDs.`;
+    if (detail === "Incident not found")  return "Incident not found in the database.";
+    if (detail === "Customer not found")  return "Customer not found in the database.";
+    if (detail === "Admin access required" || detail === "Invalid token")
+      return "Session expired. Please log out and sign in again.";
+    return detail;
+  }
+
+  // ── Auth ──────────────────────────────────────────────────────────────────
+
+  async function login() {
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value.trim();
+    const errEl    = document.getElementById("error-msg");
+    errEl.style.display = "none";
+
+    if (!username || !password) {
+      errEl.style.display = "block";
+      errEl.textContent = "Username and password are required.";
+      return;
+    }
+
+    try {
+      const res = await fetch(`${BASE}/admin/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password })
+      });
+
+      if (!res.ok) {
+        errEl.style.display = "block";
+        errEl.textContent = "Invalid credentials.";
+        return;
+      }
+
+      const data = await res.json();
+      TOKEN = data.access_token;
+      document.getElementById("login-screen").style.display = "none";
+      document.getElementById("dashboard").style.display = "block";
+      loadIncidents();
+    } catch (e) {
+      errEl.style.display = "block";
+      errEl.textContent = "Cannot connect to server. Is it running?";
+    }
+  }
+
+  function logout() {
+    TOKEN = null;
+    document.getElementById("dashboard").style.display = "none";
+    document.getElementById("login-screen").style.display = "flex";
+    document.getElementById("password").value = "";
+  }
+
+  // ── Tabs ──────────────────────────────────────────────────────────────────
+
+  function switchTab(name) {
+    const names = ["incidents", "customers", "officers"];
+    document.querySelectorAll(".tab").forEach((t, i) => {
+      t.classList.toggle("active", names[i] === name);
+    });
+    document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+    document.getElementById(`section-${name}`).classList.add("active");
+    if (name === "incidents") loadIncidents();
+    if (name === "customers") loadCustomers();
+    if (name === "officers")  loadOfficers();
+  }
+
+  // ── Generic API call ──────────────────────────────────────────────────────
+
+  async function apiCall(method, path, body = {}) {
+    const res = await fetch(`${BASE}${path}`, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token: TOKEN, ...body })
+    });
+    const data = await res.json();
+    return { ok: res.ok, status: res.status, data };
+  }
+
+  // ── Incidents ─────────────────────────────────────────────────────────────
+
+  async function loadIncidents() {
+    document.getElementById("incidents-table").innerHTML = '<div class="loading">Loading...</div>';
+    const { ok, data } = await apiCall("POST", "/admin/incidents");
+    if (!ok || !Array.isArray(data)) {
+      document.getElementById("incidents-table").innerHTML = '<div class="loading">Failed to load incidents.</div>';
+      return;
+    }
+    if (data.length === 0) {
+      document.getElementById("incidents-table").innerHTML = '<div class="loading">No incidents found.</div>';
+      return;
+    }
+    const rows = data.map(i => `
+      <tr>
+        <td>${i.id}</td>
+        <td>${i.customer_id ?? "-"}</td>
+        <td>${i.officer_id ?? "Unassigned"}</td>
+        <td><span class="status-badge status-${i.status}">${i.status}</span></td>
+        <td title="${i.description ?? ''}">${i.description ?? "-"}</td>
+        <td>${i.location ?? "-"}</td>
+        <td>${i.created_at ? new Date(i.created_at).toLocaleString() : "-"}</td>
+        <td><button class="edit-btn" onclick='openIncidentModal(${JSON.stringify(i)})'>Edit</button></td>
+      </tr>`).join("");
+    document.getElementById("incidents-table").innerHTML = `
+      <table>
+        <thead><tr>
+          <th>ID</th><th>Customer</th><th>Officer</th><th>Status</th>
+          <th>Description</th><th>Location</th><th>Created</th><th></th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+  }
+
+  function openIncidentModal(i) {
+    clearErrors("err-incident-status","err-incident-officer","err-incident-desc","err-incident-location");
+    document.getElementById("edit-incident-id").value       = i.id;
+    document.getElementById("edit-incident-status").value   = i.status ?? "";
+    document.getElementById("edit-incident-officer").value  = i.officer_id ?? "";
+    document.getElementById("edit-incident-desc").value     = i.description ?? "";
+    document.getElementById("edit-incident-location").value = i.location ?? "";
+    document.getElementById("modal-incident").classList.add("open");
+  }
+
+  async function saveIncident() {
+    const id          = parseInt(document.getElementById("edit-incident-id").value);
+    const status      = document.getElementById("edit-incident-status").value.trim().toLowerCase();
+    const officer_raw = document.getElementById("edit-incident-officer").value.trim();
+    const description = document.getElementById("edit-incident-desc").value.trim();
+    const location    = document.getElementById("edit-incident-location").value.trim();
+
+    if (!validateIncident(status, officer_raw, description, location)) return;
+
+    const officer_id = officer_raw ? parseInt(officer_raw) : null;
+
+    const { ok, data } = await apiCall("PUT", "/admin/incidents", {
+      incident_id: id,
+      status,
+      ...(officer_id !== null && { officer_id }),
+      description,
+      location
+    });
+
+    if (!ok) {
+      showToast(friendlyError(data.detail, { officer_id: officer_raw }), "error");
+      return;
+    }
+
+    showToast("Incident updated successfully", "success");
+    closeModal("modal-incident");
+    loadIncidents();
+  }
+
+  // ── Customers ─────────────────────────────────────────────────────────────
+
+  async function loadCustomers() {
+    document.getElementById("customers-table").innerHTML = '<div class="loading">Loading...</div>';
+    const { ok, data } = await apiCall("POST", "/admin/customers");
+    if (!ok || !Array.isArray(data)) {
+      document.getElementById("customers-table").innerHTML = '<div class="loading">Failed to load customers.</div>';
+      return;
+    }
+    if (data.length === 0) {
+      document.getElementById("customers-table").innerHTML = '<div class="loading">No customers found.</div>';
+      return;
+    }
+    const rows = data.map(c => `
+      <tr>
+        <td>${c.id}</td>
+        <td>${c.username}</td>
+        <td>${c.email}</td>
+        <td>${c.phone}</td>
+        <td>${c.address}</td>
+        <td><button class="edit-btn" onclick='openCustomerModal(${JSON.stringify(c)})'>Edit</button></td>
+      </tr>`).join("");
+    document.getElementById("customers-table").innerHTML = `
+      <table>
+        <thead><tr>
+          <th>ID</th><th>Username</th><th>Email</th><th>Phone</th><th>Address</th><th></th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+  }
+
+  function openCustomerModal(c) {
+    clearErrors("err-customer-email","err-customer-phone","err-customer-address");
+    document.getElementById("edit-customer-id").value      = c.id;
+    document.getElementById("edit-customer-email").value   = c.email ?? "";
+    document.getElementById("edit-customer-phone").value   = c.phone ?? "";
+    document.getElementById("edit-customer-address").value = c.address ?? "";
+    document.getElementById("modal-customer").classList.add("open");
+  }
+
+  async function saveCustomer() {
+    const id      = parseInt(document.getElementById("edit-customer-id").value);
+    const email   = document.getElementById("edit-customer-email").value.trim();
+    const phone   = document.getElementById("edit-customer-phone").value.trim();
+    const address = document.getElementById("edit-customer-address").value.trim();
+
+    if (!validateCustomer(email, phone, address)) return;
+
+    const { ok, data } = await apiCall("PUT", "/admin/customers", {
+      customer_id: id, email, phone, address
+    });
+
+    if (!ok) {
+      showToast(friendlyError(data.detail), "error");
+      return;
+    }
+
+    showToast("Customer updated successfully", "success");
+    closeModal("modal-customer");
+    loadCustomers();
+  }
+
+  // ── Officers ──────────────────────────────────────────────────────────────
+
+  async function loadOfficers() {
+    document.getElementById("officers-table").innerHTML = '<div class="loading">Loading...</div>';
+    const { ok, data } = await apiCall("POST", "/admin/officers");
+    if (!ok || !Array.isArray(data)) {
+      document.getElementById("officers-table").innerHTML = '<div class="loading">Failed to load officers.</div>';
+      return;
+    }
+    if (data.length === 0) {
+      document.getElementById("officers-table").innerHTML = '<div class="loading">No officers found.</div>';
+      return;
+    }
+    const rows = data.map(o => `
+      <tr>
+        <td>${o.id}</td>
+        <td>${o.username}</td>
+        <td>${o.email}</td>
+        <td>${o.badge_number}</td>
+        <td>${o.department}</td>
+        <td>${o.phone}</td>
+        <td>${o.location}</td>
+        <td><button class="edit-btn" onclick='openOfficerModal(${JSON.stringify(o)})'>Edit</button></td>
+      </tr>`).join("");
+    document.getElementById("officers-table").innerHTML = `
+      <table>
+        <thead><tr>
+          <th>ID</th><th>Username</th><th>Email</th><th>Badge</th>
+          <th>Dept</th><th>Phone</th><th>Location</th><th></th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+  }
+
+  function openOfficerModal(o) {
+    clearErrors("err-officer-email","err-officer-phone","err-officer-location","err-officer-dept");
+    document.getElementById("edit-officer-id").value       = o.id;
+    document.getElementById("edit-officer-email").value    = o.email ?? "";
+    document.getElementById("edit-officer-phone").value    = o.phone ?? "";
+    document.getElementById("edit-officer-location").value = o.location ?? "";
+    document.getElementById("edit-officer-dept").value     = o.department ?? "";
+    document.getElementById("modal-officer").classList.add("open");
+  }
+
+  async function saveOfficer() {
+    const id         = parseInt(document.getElementById("edit-officer-id").value);
+    const email      = document.getElementById("edit-officer-email").value.trim();
+    const phone      = document.getElementById("edit-officer-phone").value.trim();
+    const location   = document.getElementById("edit-officer-location").value.trim();
+    const department = document.getElementById("edit-officer-dept").value.trim();
+
+    if (!validateOfficer(email, phone, location, department)) return;
+
+    const { ok, data } = await apiCall("PUT", "/admin/officers", {
+      officer_id: id, email, phone, location, department
+    });
+
+    if (!ok) {
+      showToast(friendlyError(data.detail), "error");
+      return;
+    }
+
+    showToast("Officer updated successfully", "success");
+    closeModal("modal-officer");
+    loadOfficers();
+  }
+
+  // ── Modal helpers ─────────────────────────────────────────────────────────
+
+  function closeModal(id) {
+    document.getElementById(id).classList.remove("open");
+  }
+
+  document.querySelectorAll(".modal-overlay").forEach(m => {
+    m.addEventListener("click", e => { if (e.target === m) m.classList.remove("open"); });
+  });
+
+  // ── Phone: digits only while typing ──────────────────────────────────────
+  ["edit-customer-phone", "edit-officer-phone"].forEach(id => {
+    document.getElementById(id).addEventListener("input", function() {
+      this.value = this.value.replace(/\D/g, "").slice(0, 10);
+    });
+  });
+</script>
+</body>
+</html>
