@@ -5,9 +5,9 @@ from pydantic import BaseModel
 from db.database import get_db
 from models import Officer, Incident
 from utils.utils import decode_token
-
+from utils.utils import distance_km,geocode
 router = APIRouter()
-
+geo_cache = {}
 
 # ─── Pydantic Models ──────────────────────────────────────────────────────────
 
@@ -25,6 +25,9 @@ class AcceptIncidentRequest(BaseModel):
     token: str
     incident_id: int
 
+class NearbyRequest(BaseModel):
+    token: str
+    radius_km: float = 5
 
 # ─── Helper ───────────────────────────────────────────────────────────────────
 
@@ -112,3 +115,40 @@ def accept_incident(data: AcceptIncidentRequest, db: Session = Depends(get_db)):
         "incident_id": incident.id,
         "status": incident.status
     }
+
+
+@router.post("/incidents/nearby")
+def get_nearby_incidents(data: NearbyRequest, db: Session = Depends(get_db)):
+    officer = get_officer_from_token(data.token, db)
+
+    if not officer.location:
+        raise HTTPException(status_code=400, detail="Officer location not set")
+
+    off_lat, off_lon = geocode(officer.location)
+
+    if off_lat is None:
+        raise HTTPException(status_code=400, detail="Invalid officer address")
+
+    incidents = db.query(Incident).filter(Incident.officer_id == None).all()
+
+    nearby = []
+
+    for i in incidents:
+        if not i.location:
+            continue
+
+        lat, lon = geocode(i.location)
+
+        if lat is None:
+            continue
+
+        dist = distance_km(off_lat, off_lon, lat, lon)
+
+        if dist <= data.radius_km:
+            nearby.append({
+                "id": i.id,
+                "distance_km": round(dist, 2),
+                **{c.key: getattr(i, c.key) for c in inspect(i).mapper.column_attrs}
+            })
+
+    return sorted(nearby, key=lambda x: x["distance_km"])

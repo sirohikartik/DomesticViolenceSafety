@@ -202,6 +202,48 @@ r = requests.post(f"{OFFICER_URL}/incidents", json={"token": "badtoken"})
 passed = r.status_code == 401
 print_result("Invalid token rejected on /incidents", passed, r)
 
+
+print("── POST /incidents/nearby ─────────────────────────────")
+print()
+
+# 14. Get nearby incidents (basic test)
+r = requests.post(f"{OFFICER_URL}/incidents/nearby", json={
+    "token": OFFICER_TOKEN,
+    "radius_km": 10
+})
+
+passed = r.status_code == 200 and isinstance(r.json(), list)
+
+print_result("Fetch nearby incidents", passed, r,
+             note=f"Found {len(r.json())} nearby incidents" if passed else "")
+
+
+# 15. Invalid token
+r = requests.post(f"{OFFICER_URL}/incidents/nearby", json={
+    "token": "badtoken",
+    "radius_km": 10
+})
+
+passed = r.status_code == 401
+print_result("Invalid token rejected on /incidents/nearby", passed, r)
+
+
+# 16. Missing officer location (edge case)
+# First clear location
+requests.put(f"{OFFICER_URL}/me", json={
+    "token": OFFICER_TOKEN,
+    "location": None
+})
+
+r = requests.post(f"{OFFICER_URL}/incidents/nearby", json={
+    "token": OFFICER_TOKEN,
+    "radius_km": 10
+})
+
+passed = r.status_code == 400
+print_result("Nearby incidents fails without officer location", passed, r,
+             note="Expects 400 Officer location not set")
+
 print("=" * 55)
 print("  Done.")
 print("=" * 55)
