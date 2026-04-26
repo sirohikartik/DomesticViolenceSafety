@@ -1,25 +1,48 @@
-from sqlalchemy.orm import declarative_base, relationship
-from sqlalchemy import Column, Integer, String, ForeignKey
-
-Base = declarative_base()
-
-
-class User(Base):
-    __tablename__ = "users"
-
-    id = Column(Integer, primary_key=True)
-    username = Column(String(50), unique=True, nullable=False)
-    password = Column(String(255), nullable=False)
-    email = Column(String(100), unique=True, nullable=False)
-
-    tokens = relationship("RefreshToken", back_populates="user")
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Enum, Text
+from sqlalchemy.orm import relationship
+from datetime import datetime
+from db.database import Base
 
 
-class RefreshToken(Base):
-    __tablename__ = "refresh_tokens"
+class Customer(Base):
+    __tablename__ = "customers"
 
-    id = Column(Integer, primary_key=True)
-    token = Column(String(512), unique=True, nullable=False)
-    user_id = Column(Integer, ForeignKey("users.id"), unique=True)
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String, unique=True)
+    email = Column(String, unique=True)
+    password = Column(String)
 
-    user = relationship("User", back_populates="tokens")
+    phone = Column(String, nullable=False,unique=True)
+    address = Column(String, nullable=False)
+
+
+
+class Officer(Base):
+    __tablename__ = "officers"
+
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String, unique=True)
+    email = Column(String, unique=True)
+    password = Column(String)
+
+    badge_number = Column(String, nullable=False,unique = True)
+    department = Column(String, nullable=False)
+    phone = Column(String, nullable = False, unique= True)
+
+    location = Column(String, nullable=False)
+
+
+class Incident(Base):
+    __tablename__ = "incidents"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    customer_id = Column(Integer, ForeignKey("customers.id"))
+    officer_id = Column(Integer, ForeignKey("officers.id"), nullable=True)
+
+    description = Column(Text)
+    location = Column(String)
+
+    status = Column(String, default="initialized")
+    created_at = Column(DateTime, default=datetime.utcnow)
+
