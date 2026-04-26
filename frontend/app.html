@@ -1,0 +1,1546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+  <title>SafeGuard</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:        #080b12;
+      --surface:   #0e1420;
+      --card:      #131926;
+      --border:    #1e2535;
+      --border2:   #2a3347;
+      --text:      #e2e8f0;
+      --muted:     #64748b;
+      --accent:    #3b82f6;
+      --accent2:   #6366f1;
+      --danger:    #ef4444;
+      --success:   #22c55e;
+      --warn:      #f59e0b;
+      --radius:    14px;
+      --font:      'DM Sans', sans-serif;
+      --mono:      'DM Mono', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── AUTH SCREEN ─────────────────────────────────────── */
+    #auth-screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background:
+        radial-gradient(ellipse 80% 60% at 50% -10%, #1e3a5f33 0%, transparent 70%),
+        var(--bg);
+    }
+
+    .auth-box {
+      width: 100%;
+      max-width: 400px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 36px 32px;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+    }
+
+    .auth-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 28px;
+    }
+
+    .auth-logo .shield {
+      width: 38px; height: 38px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+    }
+
+    .auth-logo h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
+    .auth-logo span { color: var(--muted); font-size: 13px; display: block; font-weight: 400; }
+
+    .role-tabs {
+      display: flex;
+      background: var(--surface);
+      border-radius: 10px;
+      padding: 4px;
+      margin-bottom: 24px;
+      border: 1px solid var(--border);
+    }
+
+    .role-tab {
+      flex: 1;
+      padding: 8px;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+      border-radius: 7px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .role-tab.active {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .field { margin-bottom: 16px; }
+
+    .field label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 6px;
+    }
+
+    .field input {
+      width: 100%;
+      padding: 11px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-size: 14px;
+      font-family: var(--font);
+      outline: none;
+      transition: border 0.2s;
+    }
+
+    .field input:focus { border-color: var(--accent); }
+    .field input.err   { border-color: var(--danger); }
+
+    .field-err { font-size: 11px; color: var(--danger); margin-top: 4px; }
+
+    .btn-primary {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: var(--font);
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+      margin-top: 4px;
+    }
+
+    .btn-primary:active { transform: scale(0.98); opacity: 0.9; }
+
+    .btn-secondary {
+      padding: 10px 16px;
+      background: var(--surface);
+      color: #e2e8f0;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: var(--font);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-secondary:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+    .btn-secondary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .auth-toggle {
+      text-align: center;
+      margin-top: 18px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .auth-toggle a {
+      color: var(--accent);
+      cursor: pointer;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .auth-err {
+      background: #ef444422;
+      border: 1px solid #ef444444;
+      color: #fca5a5;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 13px;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    /* ── APP SHELL ───────────────────────────────────────── */
+    #app { display: none; min-height: 100vh; flex-direction: column; }
+    #app.visible { display: flex; }
+
+    .topbar {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 0 20px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .topbar-left { display: flex; align-items: center; gap: 10px; }
+
+    .topbar-shield {
+      width: 30px; height: 30px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px;
+    }
+
+    .topbar-title { font-size: 15px; font-weight: 700; letter-spacing: -0.3px; }
+    .topbar-role {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .role-customer { background: #3b82f622; color: #93c5fd; border: 1px solid #3b82f644; }
+    .role-officer  { background: #6366f122; color: #a5b4fc; border: 1px solid #6366f144; }
+
+    .topbar-logout {
+      width: 32px; height: 32px;
+      background: transparent;
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      color: var(--muted);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+      transition: all 0.2s;
+    }
+
+    .topbar-logout:hover { border-color: var(--danger); color: var(--danger); }
+
+    /* ── BOTTOM NAV ──────────────────────────────────────── */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: var(--card);
+      border-top: 1px solid var(--border);
+      display: flex;
+      z-index: 50;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 4px;
+      cursor: pointer;
+      transition: color 0.2s;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      gap: 4px;
+    }
+
+    .nav-item .nav-icon { font-size: 20px; line-height: 1; }
+    .nav-item.active { color: var(--accent); }
+
+    /* ── PAGE CONTENT ────────────────────────────────────── */
+    .pages { flex: 1; overflow-y: auto; padding-bottom: 80px; }
+
+    .page { display: none; padding: 20px; max-width: 600px; margin: 0 auto; }
+    .page.active { display: block; }
+
+    .page-title {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 6px;
+    }
+
+    .page-sub {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 24px;
+    }
+
+    /* ── CARDS ───────────────────────────────────────────── */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .card-title {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--muted);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* ── MONITOR ─────────────────────────────────────────── */
+    .monitor-status {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      background: var(--surface);
+      border-radius: 10px;
+      margin-bottom: 16px;
+      border: 1px solid var(--border);
+    }
+
+    .pulse-dot {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      background: var(--muted);
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    .pulse-dot.active {
+      background: var(--success);
+      box-shadow: 0 0 0 0 rgba(34,197,94,0.4);
+      animation: pulse 1.5s infinite;
+    }
+
+    .pulse-dot.danger {
+      background: var(--danger);
+      box-shadow: 0 0 0 0 rgba(239,68,68,0.4);
+      animation: pulse 0.8s infinite;
+    }
+
+    @keyframes pulse {
+      0%   { box-shadow: 0 0 0 0 currentColor; }
+      70%  { box-shadow: 0 0 0 8px transparent; }
+      100% { box-shadow: 0 0 0 0 transparent; }
+    }
+
+    .monitor-info { flex: 1; }
+    .monitor-info strong { font-size: 14px; font-weight: 600; display: block; }
+    .monitor-info span   { font-size: 12px; color: var(--muted); }
+
+    .monitor-toggle {
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: var(--font);
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+    }
+
+    .monitor-toggle.start { background: var(--success); color: #fff; }
+    .monitor-toggle.stop  { background: var(--danger);  color: #fff; }
+
+    /* TEXTAREA FOR TRANSCRIPT */
+    .transcript-box {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      height: 120px;
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--text);
+      font-family: var(--mono);
+      margin-bottom: 12px;
+      resize: none;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .transcript-box:focus { border-color: var(--accent); }
+    .transcript-box::placeholder { color: var(--muted); font-style: italic; font-family: var(--font); }
+
+    .timer-bar-wrap {
+      background: var(--surface);
+      border-radius: 4px;
+      height: 4px;
+      margin-bottom: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .timer-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      border-radius: 4px;
+      width: 0%;
+      transition: width 1s linear;
+    }
+
+    .analyze-label {
+      font-size: 11px;
+      color: var(--muted);
+      text-align: right;
+      margin-bottom: 8px;
+      font-family: var(--mono);
+    }
+
+    .flag-alert {
+      background: #ef444418;
+      border: 1px solid #ef444466;
+      border-radius: 10px;
+      padding: 14px 16px;
+      display: none;
+      margin-top: 12px;
+    }
+
+    .flag-alert.show { display: flex; gap: 12px; align-items: flex-start; }
+    .flag-alert .flag-icon { font-size: 20px; flex-shrink: 0; }
+    .flag-alert .flag-text strong { display: block; color: #fca5a5; font-size: 14px; margin-bottom: 2px; }
+    .flag-alert .flag-text span   { font-size: 12px; color: #f87171; }
+
+    /* ── MANUAL ALERT ────────────────────────────────────── */
+    .sos-btn {
+      width: 100%;
+      padding: 20px;
+      background: linear-gradient(135deg, #dc2626, #b91c1c);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 18px;
+      font-weight: 700;
+      font-family: var(--font);
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      transition: transform 0.1s, box-shadow 0.2s;
+      box-shadow: 0 4px 24px rgba(239,68,68,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .sos-btn:active { transform: scale(0.97); }
+
+    .sos-confirm {
+      background: #22c55e18;
+      border: 1px solid #22c55e44;
+      border-radius: 10px;
+      padding: 14px 16px;
+      display: none;
+      align-items: center;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .sos-confirm.show { display: flex; }
+    .sos-confirm span { font-size: 13px; color: #86efac; }
+
+    /* ── PROFILE ─────────────────────────────────────────── */
+    .profile-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .avatar {
+      width: 52px; height: 52px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      font-weight: 700;
+      flex-shrink: 0;
+      color: #fff;
+    }
+
+    .profile-name { font-size: 18px; font-weight: 700; }
+    .profile-role { font-size: 13px; color: var(--muted); margin-top: 2px; }
+
+    .profile-field {
+      margin-bottom: 14px;
+    }
+
+    .profile-field label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    .profile-field input {
+      width: 100%;
+      padding: 10px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-size: 14px;
+      font-family: var(--font);
+      outline: none;
+      transition: border 0.2s;
+    }
+
+    .profile-field input:focus { border-color: var(--accent); }
+    .profile-field input.err   { border-color: var(--danger); }
+    .profile-field .field-err  { font-size: 11px; color: var(--danger); margin-top: 4px; }
+
+    .btn-save {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: var(--font);
+      cursor: pointer;
+      transition: opacity 0.2s;
+      margin-top: 4px;
+    }
+
+    /* ── INCIDENTS ───────────────────────────────────────── */
+    .incident-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 12px;
+      transition: border-color 0.2s;
+    }
+
+    .incident-card:hover { border-color: var(--border2); }
+
+    .incident-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+
+    .incident-id {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .status-pill {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 3px 8px;
+      border-radius: 20px;
+    }
+
+    .pill-initialized { background: #3b82f622; color: #93c5fd; border: 1px solid #3b82f633; }
+    .pill-assigned    { background: #f59e0b22; color: #fcd34d; border: 1px solid #f59e0b33; }
+    .pill-resolved    { background: #22c55e22; color: #86efac; border: 1px solid #22c55e33; }
+
+    .incident-desc {
+      font-size: 13px;
+      color: var(--text);
+      margin-bottom: 8px;
+      line-height: 1.5;
+    }
+
+    .incident-meta {
+      display: flex;
+      gap: 12px;
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .incident-meta span { display: flex; align-items: center; gap: 4px; }
+
+    .btn-accept {
+      width: 100%;
+      padding: 9px;
+      background: transparent;
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: var(--font);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-accept:hover { background: var(--accent); color: #fff; }
+    .btn-accept.accepted { background: #22c55e22; border-color: #22c55e44; color: #86efac; cursor: default; }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--muted);
+    }
+
+    .empty-state .empty-icon { font-size: 36px; margin-bottom: 12px; }
+    .empty-state p { font-size: 14px; }
+
+    /* ── TABS (officer incidents) ────────────────────────── */
+    .seg-tabs {
+      display: flex;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 4px;
+      margin-bottom: 16px;
+    }
+
+    .seg-tab {
+      flex: 1;
+      text-align: center;
+      padding: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 7px;
+      cursor: pointer;
+      color: var(--muted);
+      transition: all 0.2s;
+    }
+
+    .seg-tab.active { background: var(--card); color: var(--text); border: 1px solid var(--border); }
+
+    /* ── TOAST ───────────────────────────────────────────── */
+    .toast {
+      position: fixed;
+      bottom: 90px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 10px 18px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      z-index: 999;
+      white-space: nowrap;
+      animation: toastIn 0.3s ease;
+      pointer-events: none;
+    }
+
+    .toast.success { background: #22c55e; color: #fff; }
+    .toast.error   { background: var(--danger); color: #fff; }
+    .toast.info    { background: var(--accent); color: #fff; }
+
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+      to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
+
+    /* ── LOADER ──────────────────────────────────────────── */
+    .spinner {
+      width: 18px; height: 18px;
+      border: 2px solid var(--border2);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: inline-block;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── DEEPGRAM CONFIG ─────────────────────────────────── */
+    .config-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+    }
+
+    .config-row:last-child { border-bottom: none; }
+    .config-row span { color: var(--muted); font-size: 12px; }
+
+    .config-row input[type="range"] {
+      width: 120px;
+      accent-color: var(--accent);
+    }
+
+    @media (max-width: 400px) {
+      .auth-box { padding: 28px 20px; }
+      .page { padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="auth-screen">
+  <div class="auth-box">
+    <div class="auth-logo">
+      <div class="shield">🛡</div>
+      <div>
+        <h1>SafeGuard</h1>
+        <span id="auth-mode-label">Sign in to your account</span>
+      </div>
+    </div>
+
+    <div class="role-tabs">
+      <div class="role-tab active" id="tab-customer" onclick="setRole('customer')">Customer</div>
+      <div class="role-tab" id="tab-officer" onclick="setRole('officer')">Officer</div>
+    </div>
+
+    <div class="auth-err" id="auth-err"></div>
+
+    <div id="login-form">
+      <div class="field">
+        <label>Username</label>
+        <input type="text" id="login-username" placeholder="your_username"/>
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="login-password" placeholder="••••••••"
+               onkeydown="if(event.key==='Enter') doLogin()"/>
+      </div>
+      <button class="btn-primary" onclick="doLogin()">Sign In</button>
+      <div class="auth-toggle">
+        Don't have an account? <a onclick="showSignup()">Sign up</a>
+      </div>
+    </div>
+
+    <div id="signup-form" style="display:none">
+      <div class="field">
+        <label>Username</label>
+        <input type="text" id="su-username" placeholder="username"/>
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="su-password" placeholder="••••••••"/>
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <input type="text" id="su-email" placeholder="you@example.com"/>
+      </div>
+      <div class="field">
+        <label>Phone (10 digits)</label>
+        <input type="text" id="su-phone" placeholder="9876543210" maxlength="10"/>
+      </div>
+      <div class="field">
+        <label id="su-addr-label">Address</label>
+        <input type="text" id="su-address" placeholder="Your address"/>
+      </div>
+      <div id="su-officer-fields" style="display:none">
+        <div class="field">
+          <label>Badge Number</label>
+          <input type="text" id="su-badge" placeholder="B-1234"/>
+        </div>
+        <div class="field">
+          <label>Department</label>
+          <input type="text" id="su-dept" placeholder="e.g. Homicide"/>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="doSignup()">Create Account</button>
+      <div class="auth-toggle">
+        Already have an account? <a onclick="showLogin()">Sign in</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-shield">🛡</div>
+      <div>
+        <div class="topbar-title">SafeGuard</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span class="topbar-role" id="topbar-role-badge"></span>
+      <button class="topbar-logout" onclick="doLogout()" title="Logout">↩</button>
+    </div>
+  </div>
+
+  <div class="pages">
+
+    <div class="page active" id="page-monitor">
+      <div class="page-title">Monitor</div>
+      <div class="page-sub">AI listens for signs of distress</div>
+
+      <div class="card">
+        <div class="card-title">⚙️ Configuration</div>
+        <div class="config-row">
+          Analyze every
+          <div style="display:flex;align-items:center;gap:8px;">
+            <input type="range" id="interval-slider" min="10" max="120" value="30" step="10"
+                   oninput="document.getElementById('interval-val').textContent=this.value"/>
+            <span id="interval-val" style="font-family:var(--mono);font-size:12px;width:30px;">30</span>s
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🎙 Live Monitor</div>
+
+        <div class="monitor-status">
+          <div class="pulse-dot" id="monitor-dot"></div>
+          <div class="monitor-info">
+            <strong id="monitor-status-text">Not active</strong>
+            <span id="monitor-status-sub">Press Start to begin monitoring</span>
+          </div>
+          <button class="monitor-toggle start" id="monitor-btn" onclick="toggleMonitor()">Start</button>
+        </div>
+
+        <div class="analyze-label" id="analyze-countdown" style="display:none;">Next analysis in <span id="countdown-val">--</span>s</div>
+        <div class="timer-bar-wrap" id="timer-bar-wrap" style="display:none;">
+          <div class="timer-bar" id="timer-bar"></div>
+        </div>
+
+        <textarea id="transcript-box" class="transcript-box" placeholder="Transcription appears here..."></textarea>
+        
+        <div style="display:flex; justify-content:flex-end; margin-bottom: 12px;">
+          <button id="force-analyze-btn" class="btn-secondary" onclick="analyzeBuffer(true)" disabled>Force Analysis →</button>
+        </div>
+
+        <div class="flag-alert" id="flag-alert">
+          <div class="flag-icon">🚨</div>
+          <div class="flag-text">
+            <strong>Distress Detected</strong>
+            <span>An incident has been automatically created and authorities notified.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page" id="page-alert">
+      <div class="page-title">Emergency Alert</div>
+      <div class="page-sub">Send an immediate distress signal</div>
+
+      <div class="card">
+        <div class="card-title">🆘 Manual SOS</div>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6;">
+          Press the button below to immediately file an incident report. Emergency services will be notified with your registered location.
+        </p>
+        <button class="sos-btn" id="sos-btn" onclick="sendSOS()">
+          <span>🆘</span> SEND EMERGENCY ALERT
+        </button>
+        <div class="sos-confirm" id="sos-confirm">
+          <span style="font-size:20px;">✅</span>
+          <span>Alert sent. Incident <strong id="sos-incident-id">#--</strong> created. Stay safe.</span>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:8px;">
+        <div class="card-title">📋 What happens next</div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.8;">
+          1. An incident is created in the system<br/>
+          2. Available officers are notified<br/>
+          3. An officer will accept and respond<br/>
+          4. You can track status via the admin panel
+        </div>
+      </div>
+    </div>
+
+    <div class="page" id="page-cust-profile">
+      <div class="page-title">Profile</div>
+      <div class="page-sub">Manage your account</div>
+
+      <div class="card">
+        <div class="profile-header">
+          <div class="avatar" id="cust-avatar">?</div>
+          <div>
+            <div class="profile-name" id="cust-profile-name">—</div>
+            <div class="profile-role">Customer Account</div>
+          </div>
+        </div>
+
+        <div class="profile-field">
+          <label>Email</label>
+          <input type="text" id="cust-email" placeholder="you@example.com"/>
+          <div class="field-err" id="err-cust-email"></div>
+        </div>
+        <div class="profile-field">
+          <label>Phone (10 digits)</label>
+          <input type="text" id="cust-phone" placeholder="9876543210" maxlength="10"/>
+          <div class="field-err" id="err-cust-phone"></div>
+        </div>
+        <div class="profile-field">
+          <label>Address</label>
+          <input type="text" id="cust-address" placeholder="Your address"/>
+          <div class="field-err" id="err-cust-address"></div>
+        </div>
+        <button class="btn-save" onclick="saveCustomerProfile()">Save Changes</button>
+      </div>
+    </div>
+
+    <div class="page" id="page-incidents">
+      <div class="page-title">Incidents</div>
+      <div class="page-sub">Manage and respond to cases</div>
+
+      <div class="seg-tabs">
+        <div class="seg-tab active" id="seg-all" onclick="switchIncidentTab('all')">All Unassigned</div>
+        <div class="seg-tab" id="seg-mine" onclick="switchIncidentTab('mine')">My Cases</div>
+      </div>
+
+      <div id="incidents-list"></div>
+    </div>
+
+    <div class="page" id="page-off-profile">
+      <div class="page-title">Profile</div>
+      <div class="page-sub">Manage your officer account</div>
+
+      <div class="card">
+        <div class="profile-header">
+          <div class="avatar" id="off-avatar">?</div>
+          <div>
+            <div class="profile-name" id="off-profile-name">—</div>
+            <div class="profile-role" id="off-profile-badge">Officer</div>
+          </div>
+        </div>
+
+        <div class="profile-field">
+          <label>Email</label>
+          <input type="text" id="off-email" placeholder="officer@pd.gov"/>
+          <div class="field-err" id="err-off-email"></div>
+        </div>
+        <div class="profile-field">
+          <label>Phone (10 digits)</label>
+          <input type="text" id="off-phone" placeholder="9876543210" maxlength="10"/>
+          <div class="field-err" id="err-off-phone"></div>
+        </div>
+        <div class="profile-field">
+          <label>Location / Precinct</label>
+          <input type="text" id="off-location" placeholder="Precinct 7, Downtown"/>
+          <div class="field-err" id="err-off-location"></div>
+        </div>
+        <div class="profile-field">
+          <label>Department</label>
+          <input type="text" id="off-dept" placeholder="e.g. Homicide"/>
+          <div class="field-err" id="err-off-dept"></div>
+        </div>
+        <button class="btn-save" onclick="saveOfficerProfile()">Save Changes</button>
+      </div>
+    </div>
+
+  </div><div class="bottom-nav" id="bottom-nav"></div>
+</div><script>
+// ══════════════════════════════════════════════════════════
+//  CONFIG
+// ══════════════════════════════════════════════════════════
+const BASE =window.location.origin
+const DEEPGRAM_API_KEY = '36e7f70511cc4cd977fe58e88591ae7f353ae233';
+
+// ══════════════════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════════════════
+let TOKEN     = null;
+let ROLE      = null;
+let authRole  = "customer"; // selected on auth screen
+let isSignup  = false;
+
+// Monitor state
+let mediaRecorder    = null;
+let dgSocket         = null;
+let monitorActive    = false;
+let analyzeTimer     = null;
+let countdownTimer   = null;
+let countdownVal     = 30;
+let timerProgress    = 0;
+
+// ══════════════════════════════════════════════════════════
+//  TOAST
+// ══════════════════════════════════════════════════════════
+function toast(msg, type = "info") {
+  document.querySelectorAll(".toast").forEach(t => t.remove());
+  const t = document.createElement("div");
+  t.className = `toast ${type}`;
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+
+// ══════════════════════════════════════════════════════════
+//  AUTH UI
+// ══════════════════════════════════════════════════════════
+function setRole(r) {
+  authRole = r;
+  document.getElementById("tab-customer").classList.toggle("active", r === "customer");
+  document.getElementById("tab-officer").classList.toggle("active",  r === "officer");
+  document.getElementById("su-officer-fields").style.display = r === "officer" ? "block" : "none";
+  document.getElementById("su-addr-label").textContent = r === "officer" ? "Location / Precinct" : "Address";
+}
+
+function showSignup() {
+  isSignup = true;
+  document.getElementById("login-form").style.display  = "none";
+  document.getElementById("signup-form").style.display = "block";
+  document.getElementById("auth-mode-label").textContent = "Create your account";
+  document.getElementById("auth-err").style.display = "none";
+}
+
+function showLogin() {
+  isSignup = false;
+  document.getElementById("login-form").style.display  = "block";
+  document.getElementById("signup-form").style.display = "none";
+  document.getElementById("auth-mode-label").textContent = "Sign in to your account";
+  document.getElementById("auth-err").style.display = "none";
+}
+
+function showAuthErr(msg) {
+  const el = document.getElementById("auth-err");
+  el.textContent = msg;
+  el.style.display = "block";
+}
+
+// ══════════════════════════════════════════════════════════
+//  LOGIN
+// ══════════════════════════════════════════════════════════
+async function doLogin() {
+  const username = document.getElementById("login-username").value.trim();
+  const password = document.getElementById("login-password").value.trim();
+  if (!username || !password) { showAuthErr("Please fill in all fields."); return; }
+
+  const res = await fetch(`${BASE}/auth/login`, {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, password })
+  });
+
+  if (!res.ok) { showAuthErr("Invalid username or password."); return; }
+  const data = await res.json();
+
+  // decode role from JWT payload
+  try {
+    const payload = JSON.parse(atob(data.access_token.split(".")[1]));
+    ROLE  = payload.role;
+    TOKEN = data.access_token;
+    bootApp();
+  } catch { showAuthErr("Unexpected error. Try again."); }
+}
+
+// ══════════════════════════════════════════════════════════
+//  SIGNUP
+// ══════════════════════════════════════════════════════════
+async function doSignup() {
+  const username = document.getElementById("su-username").value.trim();
+  const password = document.getElementById("su-password").value.trim();
+  const email    = document.getElementById("su-email").value.trim();
+  const phone    = document.getElementById("su-phone").value.trim();
+  const address  = document.getElementById("su-address").value.trim();
+
+  if (!username || !password || !email || !phone || !address) {
+    showAuthErr("Please fill in all fields."); return;
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    showAuthErr("Enter a valid email address."); return;
+  }
+  if (!/^\d{10}$/.test(phone)) {
+    showAuthErr("Phone must be exactly 10 digits."); return;
+  }
+
+  const body = { username, password, email, phone, address, role: authRole };
+
+  if (authRole === "officer") {
+    body.badge_num = document.getElementById("su-badge").value.trim();
+    body.dept      = document.getElementById("su-dept").value.trim();
+    if (!body.badge_num || !body.dept) { showAuthErr("Badge number and department are required."); return; }
+  }
+
+  const res = await fetch(`${BASE}/auth/signup`, {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body)
+  });
+
+  if (!res.ok) {
+    const d = await res.json();
+    showAuthErr(d.detail || "Signup failed."); return;
+  }
+
+  const data = await res.json();
+  try {
+    const payload = JSON.parse(atob(data.access_token.split(".")[1]));
+    ROLE  = payload.role;
+    TOKEN = data.access_token;
+    bootApp();
+  } catch { showAuthErr("Unexpected error."); }
+}
+
+// ══════════════════════════════════════════════════════════
+//  BOOT APP
+// ══════════════════════════════════════════════════════════
+function bootApp() {
+  document.getElementById("auth-screen").style.display = "none";
+  const app = document.getElementById("app");
+  app.classList.add("visible");
+
+  const badge = document.getElementById("topbar-role-badge");
+  badge.textContent = ROLE;
+  badge.className   = `topbar-role role-${ROLE}`;
+
+  buildNav();
+
+  if (ROLE === "customer") {
+    loadCustomerProfile();
+    showPage("page-monitor");
+  } else {
+    loadOfficerProfile();
+    loadIncidents("all");
+    showPage("page-incidents");
+  }
+}
+
+function doLogout() {
+  TOKEN = null; ROLE = null;
+  stopMonitor();
+  document.getElementById("app").classList.remove("visible");
+  document.getElementById("auth-screen").style.display = "flex";
+  document.getElementById("login-username").value = "";
+  document.getElementById("login-password").value = "";
+  showLogin();
+}
+
+// ══════════════════════════════════════════════════════════
+//  NAV
+// ══════════════════════════════════════════════════════════
+const NAV_CUSTOMER = [
+  { icon: "🎙", label: "Monitor", page: "page-monitor" },
+  { icon: "🆘", label: "Alert",   page: "page-alert" },
+  { icon: "👤", label: "Profile", page: "page-cust-profile" },
+];
+
+const NAV_OFFICER = [
+  { icon: "📋", label: "Incidents", page: "page-incidents" },
+  { icon: "👤", label: "Profile",   page: "page-off-profile" },
+];
+
+function buildNav() {
+  const nav   = document.getElementById("bottom-nav");
+  const items = ROLE === "customer" ? NAV_CUSTOMER : NAV_OFFICER;
+  nav.innerHTML = items.map(n => `
+    <div class="nav-item" id="nav-${n.page}" onclick="showPage('${n.page}')">
+      <span class="nav-icon">${n.icon}</span>${n.label}
+    </div>`).join("");
+}
+
+function showPage(id) {
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
+  document.getElementById(id)?.classList.add("active");
+  document.getElementById(`nav-${id}`)?.classList.add("active");
+
+  if (id === "page-incidents") loadIncidents(currentIncidentTab);
+}
+
+// ══════════════════════════════════════════════════════════
+//  CUSTOMER PROFILE
+// ══════════════════════════════════════════════════════════
+async function loadCustomerProfile() {
+  const res = await fetch(`${BASE}/customer/me`, {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token: TOKEN })
+  });
+  if (!res.ok) return;
+  const d = await res.json();
+  document.getElementById("cust-avatar").textContent       = (d.username || "?")[0].toUpperCase();
+  document.getElementById("cust-profile-name").textContent = d.username || "—";
+  document.getElementById("cust-email").value   = d.email    || "";
+  document.getElementById("cust-phone").value   = d.phone    || "";
+  document.getElementById("cust-address").value = d.address || "";
+}
+
+function validateCustomer() {
+  let ok = true;
+  const email   = document.getElementById("cust-email").value.trim();
+  const phone   = document.getElementById("cust-phone").value.trim();
+  const address = document.getElementById("cust-address").value.trim();
+
+  setFErr("err-cust-email",   "");
+  setFErr("err-cust-phone",   "");
+  setFErr("err-cust-address", "");
+
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    setFErr("err-cust-email", "Enter a valid email."); ok = false;
+  }
+  if (!phone || !/^\d{10}$/.test(phone)) {
+    setFErr("err-cust-phone", "Phone must be 10 digits."); ok = false;
+  }
+  if (!address || address.length < 5) {
+    setFErr("err-cust-address", "Address is required (min 5 chars)."); ok = false;
+  }
+  return ok;
+}
+
+async function saveCustomerProfile() {
+  if (!validateCustomer()) return;
+  const res = await fetch(`${BASE}/customer/me`, {
+    method: "PUT", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      token:   TOKEN,
+      email:   document.getElementById("cust-email").value.trim(),
+      phone:   document.getElementById("cust-phone").value.trim(),
+      address: document.getElementById("cust-address").value.trim()
+    })
+  });
+  if (res.ok) toast("Profile updated", "success");
+  else { const d = await res.json(); toast(d.detail || "Update failed", "error"); }
+}
+
+// ══════════════════════════════════════════════════════════
+//  OFFICER PROFILE
+// ══════════════════════════════════════════════════════════
+async function loadOfficerProfile() {
+  const res = await fetch(`${BASE}/officer/me`, {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token: TOKEN })
+  });
+  if (!res.ok) return;
+  const d = await res.json();
+  document.getElementById("off-avatar").textContent        = (d.username || "?")[0].toUpperCase();
+  document.getElementById("off-profile-name").textContent  = d.username  || "—";
+  document.getElementById("off-profile-badge").textContent = `Badge: ${d.badge_number || "—"} · ${d.department || ""}`;
+  document.getElementById("off-email").value    = d.email      || "";
+  document.getElementById("off-phone").value    = d.phone      || "";
+  document.getElementById("off-location").value = d.location   || "";
+  document.getElementById("off-dept").value     = d.department || "";
+}
+
+function validateOfficer() {
+  let ok = true;
+  const email    = document.getElementById("off-email").value.trim();
+  const phone    = document.getElementById("off-phone").value.trim();
+  const location = document.getElementById("off-location").value.trim();
+  const dept     = document.getElementById("off-dept").value.trim();
+
+  ["err-off-email","err-off-phone","err-off-location","err-off-dept"].forEach(id => setFErr(id, ""));
+
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    setFErr("err-off-email", "Enter a valid email."); ok = false;
+  }
+  if (!phone || !/^\d{10}$/.test(phone)) {
+    setFErr("err-off-phone", "Phone must be 10 digits."); ok = false;
+  }
+  if (!location || location.length < 3) {
+    setFErr("err-off-location", "Location is required."); ok = false;
+  }
+  if (!dept || dept.length < 2) {
+    setFErr("err-off-dept", "Department is required."); ok = false;
+  }
+  return ok;
+}
+
+async function saveOfficerProfile() {
+  if (!validateOfficer()) return;
+  const res = await fetch(`${BASE}/officer/me`, {
+    method: "PUT", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      token:      TOKEN,
+      email:      document.getElementById("off-email").value.trim(),
+      phone:      document.getElementById("off-phone").value.trim(),
+      location:   document.getElementById("off-location").value.trim(),
+      department: document.getElementById("off-dept").value.trim()
+    })
+  });
+  if (res.ok) { toast("Profile updated", "success"); loadOfficerProfile(); }
+  else { const d = await res.json(); toast(d.detail || "Update failed", "error"); }
+}
+
+// ══════════════════════════════════════════════════════════
+//  MANUAL SOS
+// ══════════════════════════════════════════════════════════
+async function sendSOS() {
+  const btn = document.getElementById("sos-btn");
+  btn.disabled  = true;
+  btn.innerHTML = `<span class="spinner"></span> Sending...`;
+
+  const res = await fetch(`${BASE}/customer/report`, {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token: TOKEN })
+  });
+
+  if (res.ok) {
+    const d = await res.json();
+    document.getElementById("sos-incident-id").textContent = `#${d.incident_id}`;
+    document.getElementById("sos-confirm").classList.add("show");
+    toast("🆘 Alert sent!", "success");
+    // reset after 8s
+    setTimeout(() => {
+      btn.disabled  = false;
+      btn.innerHTML = `<span>🆘</span> SEND EMERGENCY ALERT`;
+      document.getElementById("sos-confirm").classList.remove("show");
+    }, 8000);
+  } else {
+    btn.disabled  = false;
+    btn.innerHTML = `<span>🆘</span> SEND EMERGENCY ALERT`;
+    toast("Failed to send alert", "error");
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+//  DEEPGRAM MONITOR & AI ANALYSIS
+// ══════════════════════════════════════════════════════════
+function toggleMonitor() {
+  if (monitorActive) stopMonitor();
+  else startMonitor();
+}
+
+async function startMonitor() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    monitorActive = true;
+
+    // UI
+    document.getElementById("monitor-dot").className          = "pulse-dot active";
+    document.getElementById("monitor-status-text").textContent  = "Listening...";
+    document.getElementById("monitor-status-sub").textContent   = "Audio is being transcribed live";
+    document.getElementById("monitor-btn").textContent         = "Stop";
+    document.getElementById("monitor-btn").className           = "monitor-toggle stop";
+    document.getElementById("transcript-box").value            = "";
+    document.getElementById("flag-alert").classList.remove("show");
+    document.getElementById("analyze-countdown").style.display = "block";
+    document.getElementById("timer-bar-wrap").style.display    = "block";
+    document.getElementById("force-analyze-btn").disabled      = false;
+
+    // Deepgram WebSocket - Exactly matching your Avatar Studio example
+    dgSocket = new WebSocket('wss://api.deepgram.com/v1/listen?model=nova-2&smart_format=true', ['token', DEEPGRAM_API_KEY]);
+
+    dgSocket.onopen = () => {
+      mediaRecorder = new MediaRecorder(stream);
+      mediaRecorder.addEventListener('dataavailable', e => { 
+        if (e.data.size > 0 && dgSocket.readyState === WebSocket.OPEN) {
+          dgSocket.send(e.data);
+        }
+      });
+      mediaRecorder.start(250);
+    };
+
+    dgSocket.onmessage = msg => {
+      const r = JSON.parse(msg.data);
+      const t = r.channel?.alternatives?.[0]?.transcript;
+      
+      // Append only when final, exactly like the reference file
+      if(t && r.is_final) { 
+        const tBox = document.getElementById('transcript-box');
+        tBox.value += (tBox.value ? ' ' : '') + t; 
+        tBox.scrollTop = tBox.scrollHeight; 
+      }
+    };
+
+    dgSocket.onerror = () => { toast("Deepgram connection error", "error"); stopMonitor(); };
+    dgSocket.onclose = () => { if (monitorActive) stopMonitor(); };
+
+    // Analyze loop
+    startAnalyzeLoop();
+
+  } catch (err) {
+    toast("Microphone access denied", "error");
+  }
+}
+
+function stopMonitor() {
+  monitorActive = false;
+  mediaRecorder?.stop();
+  dgSocket?.close();
+  clearInterval(analyzeTimer);
+  clearInterval(countdownTimer);
+  mediaRecorder = null;
+  dgSocket      = null;
+
+  document.getElementById("monitor-dot").className            = "pulse-dot";
+  document.getElementById("monitor-status-text").textContent  = "Not active";
+  document.getElementById("monitor-status-sub").textContent   = "Press Start to begin monitoring";
+  document.getElementById("monitor-btn").textContent          = "Start";
+  document.getElementById("monitor-btn").className            = "monitor-toggle start";
+  document.getElementById("analyze-countdown").style.display  = "none";
+  document.getElementById("timer-bar-wrap").style.display     = "none";
+  document.getElementById("timer-bar").style.width            = "0%";
+  document.getElementById("force-analyze-btn").disabled       = true;
+}
+
+function startAnalyzeLoop() {
+  const interval = parseInt(document.getElementById("interval-slider").value);
+  countdownVal   = interval;
+  timerProgress  = 0;
+
+  document.getElementById("countdown-val").textContent = countdownVal;
+  document.getElementById("timer-bar").style.width     = "0%";
+
+  // countdown every second
+  countdownTimer = setInterval(() => {
+    countdownVal--;
+    timerProgress = ((interval - countdownVal) / interval) * 100;
+    document.getElementById("countdown-val").textContent = Math.max(0, countdownVal);
+    document.getElementById("timer-bar").style.width    = timerProgress + "%";
+    if (countdownVal <= 0) {
+      countdownVal  = interval;
+      timerProgress = 0;
+    }
+  }, 1000);
+
+  // analyze every N seconds
+  analyzeTimer = setInterval(() => analyzeBuffer(), interval * 1000);
+}
+
+// Accepts `isManual` parameter to force the send
+async function analyzeBuffer(isManual = false) {
+  const tBox = document.getElementById("transcript-box");
+  const text = tBox.value.trim();
+  
+  if (!text) {
+    if (isManual) toast("No text to analyze", "warn");
+    return;
+  }
+
+  const statusSub = document.getElementById("monitor-status-sub");
+  statusSub.textContent = "Analyzing audio data with AI...";
+
+  if (isManual) {
+    toast("Sending manual transcript to service...", "info");
+    // Reset the countdown timer
+    countdownVal = parseInt(document.getElementById("interval-slider").value);
+    document.getElementById("timer-bar").style.width = "0%";
+  }
+
+  try {
+    const res = await fetch(`${BASE}/customer/analyze`, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token: TOKEN, conversation: text })
+    });
+
+    statusSub.textContent = "Audio is being transcribed live";
+
+    if (!res.ok) {
+      if (isManual) toast("Error communicating with analysis service", "error");
+      return;
+    }
+    
+    const d = await res.json();
+
+    if (d.flagged) {
+      document.getElementById("monitor-dot").className          = "pulse-dot danger";
+      document.getElementById("flag-alert").classList.add("show");
+      toast("🚨 Distress detected! Incident created.", "error");
+      tBox.value = ""; // clear buffer after flag
+    } else if (isManual) {
+      toast("Analysis complete: No distress detected.", "success");
+      tBox.value = ""; // clear buffer if manually pushed and everything was fine
+    }
+  } catch (e) {
+    statusSub.textContent = "Audio is being transcribed live";
+    if (isManual) toast("Failed to connect to service.", "error");
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+//  INCIDENTS (OFFICER)
+// ══════════════════════════════════════════════════════════
+let currentIncidentTab = "all";
+
+function switchIncidentTab(tab) {
+  currentIncidentTab = tab;
+  document.getElementById("seg-all").classList.toggle("active",  tab === "all");
+  document.getElementById("seg-mine").classList.toggle("active", tab === "mine");
+  loadIncidents(tab);
+}
+
+async function loadIncidents(tab) {
+  const list = document.getElementById("incidents-list");
+  list.innerHTML = `<div style="text-align:center;padding:30px;"><span class="spinner"></span></div>`;
+
+  const endpoint = tab === "all" ? "/officer/incidents/all" : "/officer/incidents";
+  const res = await fetch(`${BASE}${endpoint}`, {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token: TOKEN })
+  });
+
+  if (!res.ok) { list.innerHTML = `<div class="empty-state"><p>Failed to load incidents</p></div>`; return; }
+
+  const incidents = await res.json();
+
+  if (!incidents.length) {
+    list.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">${tab === "all" ? "📭" : "✅"}</div>
+        <p>${tab === "all" ? "No unassigned incidents" : "No cases assigned to you yet"}</p>
+      </div>`;
+    return;
+  }
+
+  list.innerHTML = incidents.map(i => `
+    <div class="incident-card" id="inc-${i.id}">
+      <div class="incident-top">
+        <span class="incident-id">INC-${String(i.id).padStart(4,"0")}</span>
+        <span class="status-pill pill-${i.status}">${i.status}</span>
+      </div>
+      <div class="incident-desc">${i.description || "No description"}</div>
+      <div class="incident-meta">
+        <span>📍 ${i.location || "Unknown location"}</span>
+        <span>👤 Customer #${i.customer_id}</span>
+        <span>🕐 ${i.created_at ? new Date(i.created_at).toLocaleDateString() : "—"}</span>
+      </div>
+      ${tab === "all" ? `<button class="btn-accept" onclick="acceptIncident(${i.id})">Accept Incident</button>` : ""}
+    </div>`).join("");
+}
+
+async function acceptIncident(id) {
+  const btn = document.querySelector(`#inc-${id} .btn-accept`);
+  if (btn) { btn.disabled = true; btn.textContent = "Accepting..."; }
+
+  const res = await fetch(`${BASE}/officer/incidents/accept`, {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token: TOKEN, incident_id: id })
+  });
+
+  if (res.ok) {
+    toast("Incident accepted ✓", "success");
+    if (btn) { btn.textContent = "✓ Accepted"; btn.className = "btn-accept accepted"; }
+    setTimeout(() => loadIncidents("all"), 1000);
+  } else {
+    const d = await res.json();
+    toast(d.detail || "Failed to accept", "error");
+    if (btn) { btn.disabled = false; btn.textContent = "Accept Incident"; }
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+//  HELPERS
+// ══════════════════════════════════════════════════════════
+function setFErr(id, msg) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = msg;
+}
+
+// phone: digits only
+["su-phone","cust-phone","off-phone"].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener("input", function() {
+    this.value = this.value.replace(/\D/g,"").slice(0,10);
+  });
+});
+</script>
+</body>
+</html>
