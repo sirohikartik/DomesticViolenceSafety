@@ -141,13 +141,17 @@ def get_all_incidents(data: AdminToken, db: Session = Depends(get_db)):
 
 @router.put("/incidents")
 def update_incident(data: UpdateIncident, db: Session = Depends(get_db)):
+    print(f"INCIDENT ID: {data.incident_id}")
+    print(f"ALL DATA: {data}")
+    incident = db.query(Incident).filter(Incident.id == data.incident_id).first()
+    print(f"INCIDENT FOUND: {incident}")
     verify_admin(data.token)
     incident = db.query(Incident).filter(Incident.id == data.incident_id).first()
     if not incident:
         raise HTTPException(status_code=404, detail="Incident not found")
     if data.status:
         incident.status = data.status
-    if data.officer_id is not None:
+    if data.officer_id is not None and data.officer_id != 0:  # guard against 0 or None
         officer = db.query(Officer).filter(Officer.id == data.officer_id).first()
         if not officer:
             raise HTTPException(status_code=404, detail="Officer not found")
