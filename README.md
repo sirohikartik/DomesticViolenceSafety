@@ -139,7 +139,7 @@ Admin credentials are hardcoded via `.env` — no DB table needed.
 
 The `/customer/analyze` route accepts a conversation string and sends it to a locally running **Ollama** instance for domestic violence/aggression detection.
 
-- Model: `gemma3:4b`
+- Model: `gemma3:27b-cloud`
 - Endpoint: `http://localhost:11434/api/chat`
 - If flagged `True` → an incident is automatically created
 - If flagged `False` → no action taken
