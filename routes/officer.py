@@ -9,7 +9,6 @@ from utils.utils import distance_km,geocode
 router = APIRouter()
 geo_cache = {}
 
-# ─── Pydantic Models ──────────────────────────────────────────────────────────
 
 class OfficerRequest(BaseModel):
     token: str
@@ -29,7 +28,6 @@ class NearbyRequest(BaseModel):
     token: str
     radius_km: float = 5
 
-# ─── Helper ───────────────────────────────────────────────────────────────────
 
 def get_officer_from_token(token: str, db: Session) -> Officer:
     decoded = decode_token(token)
@@ -51,7 +49,6 @@ def strip_password(obj) -> dict:
     }
 
 
-# ─── Routes ───────────────────────────────────────────────────────────────────
 
 @router.post("/me")
 def get_officer_details(data: TokenOnly, db: Session = Depends(get_db)):
