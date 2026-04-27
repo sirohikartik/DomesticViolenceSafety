@@ -161,7 +161,9 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 18px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+      gap: 10px;
     }
 
     .section-header h3 { font-size: 15px; font-weight: 700; color: #fff; }
@@ -178,6 +180,93 @@
 
     .refresh-btn:hover { background: #3a3d4e; }
 
+    /* ── FILTER BAR ── */
+    .filter-bar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .search-input {
+      flex: 1;
+      min-width: 180px;
+      padding: 8px 12px 8px 34px;
+      background: #1a1d27;
+      border: 1px solid #2a2d3e;
+      border-radius: 8px;
+      color: #e0e0e0;
+      font-size: 13px;
+      outline: none;
+      transition: border 0.2s;
+      position: relative;
+    }
+
+    .search-input:focus { border-color: #5c6bc0; }
+
+    .search-wrap {
+      flex: 1;
+      min-width: 180px;
+      position: relative;
+    }
+
+    .search-wrap .icon {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #555;
+      font-size: 14px;
+      pointer-events: none;
+    }
+
+    .filter-select {
+      padding: 8px 12px;
+      background: #1a1d27;
+      border: 1px solid #2a2d3e;
+      border-radius: 8px;
+      color: #e0e0e0;
+      font-size: 13px;
+      outline: none;
+      cursor: pointer;
+      transition: border 0.2s;
+    }
+
+    .filter-select:focus { border-color: #5c6bc0; }
+
+    .dept-chips {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .dept-chip {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      background: #1a1d27;
+      border: 1px solid #2a2d3e;
+      color: #888;
+      transition: all 0.15s;
+      user-select: none;
+    }
+
+    .dept-chip:hover { border-color: #5c6bc0; color: #ccc; }
+    .dept-chip.active { background: #5c6bc022; border-color: #5c6bc0; color: #9fa8da; }
+
+    .results-count {
+      font-size: 12px;
+      color: #555;
+      margin-bottom: 10px;
+    }
+
+    .results-count span { color: #9fa8da; font-weight: 600; }
+
+    /* ── TABLE ── */
     table { width: 100%; border-collapse: collapse; font-size: 13px; }
 
     th {
@@ -203,6 +292,8 @@
 
     tr:hover td { background: #1e2130; }
 
+    .highlight { background: #5c6bc033; border-radius: 3px; padding: 0 2px; color: #c5cae9; }
+
     .status-badge {
       padding: 3px 10px;
       border-radius: 20px;
@@ -227,6 +318,7 @@
 
     .edit-btn:hover { background: #5c6bc0; color: #fff; border-color: #5c6bc0; }
 
+    /* ── MODAL ── */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -269,6 +361,7 @@
 
     .loading { color: #888; font-size: 13px; padding: 20px 0; text-align: center; }
 
+    /* ── TOAST ── */
     .toast {
       position: fixed;
       bottom: 24px;
@@ -323,29 +416,65 @@
   </div>
 
   <div class="content">
+
+    <!-- INCIDENTS -->
     <div class="section active" id="section-incidents">
       <div class="section-header">
         <h3>All Incidents</h3>
         <button class="refresh-btn" onclick="loadIncidents()">↻ Refresh</button>
       </div>
+      <div class="filter-bar">
+        <div class="search-wrap">
+          <span class="icon">🔍</span>
+          <input class="search-input" id="search-incidents" placeholder="Search by location or description..."
+                 oninput="filterIncidents()"/>
+        </div>
+        <select class="filter-select" id="filter-incident-status" onchange="filterIncidents()">
+          <option value="">All Statuses</option>
+          <option value="initialized">Initialized</option>
+          <option value="assigned">Assigned</option>
+          <option value="resolved">Resolved</option>
+        </select>
+      </div>
+      <div class="results-count" id="count-incidents"></div>
       <div id="incidents-table"><div class="loading">Loading...</div></div>
     </div>
 
+    <!-- CUSTOMERS -->
     <div class="section" id="section-customers">
       <div class="section-header">
         <h3>All Customers</h3>
         <button class="refresh-btn" onclick="loadCustomers()">↻ Refresh</button>
       </div>
+      <div class="filter-bar">
+        <div class="search-wrap">
+          <span class="icon">🔍</span>
+          <input class="search-input" id="search-customers" placeholder="Search by username, email or phone..."
+                 oninput="filterCustomers()"/>
+        </div>
+      </div>
+      <div class="results-count" id="count-customers"></div>
       <div id="customers-table"><div class="loading">Loading...</div></div>
     </div>
 
+    <!-- OFFICERS -->
     <div class="section" id="section-officers">
       <div class="section-header">
         <h3>All Officers</h3>
         <button class="refresh-btn" onclick="loadOfficers()">↻ Refresh</button>
       </div>
+      <div class="filter-bar">
+        <div class="search-wrap">
+          <span class="icon">🔍</span>
+          <input class="search-input" id="search-officers" placeholder="Search by username, email or badge..."
+                 oninput="filterOfficers()"/>
+        </div>
+      </div>
+      <div class="dept-chips" id="dept-chips"></div>
+      <div class="results-count" id="count-officers"></div>
       <div id="officers-table"><div class="loading">Loading...</div></div>
     </div>
+
   </div>
 </div>
 
@@ -354,24 +483,19 @@
   <div class="modal">
     <h3>Edit Incident</h3>
     <input type="hidden" id="edit-incident-id" />
-
     <label>Status *</label>
     <input type="text" id="edit-incident-status" placeholder="initialized / assigned / resolved" />
     <span class="field-error" id="err-incident-status"></span>
-
     <label>Officer ID</label>
     <input type="text" id="edit-incident-officer" placeholder="Leave blank to keep unchanged" />
     <span class="field-hint">Must be a valid numeric officer ID. Check Officers tab.</span>
     <span class="field-error" id="err-incident-officer"></span>
-
     <label>Description *</label>
     <input type="text" id="edit-incident-desc" placeholder="Description" />
     <span class="field-error" id="err-incident-desc"></span>
-
     <label>Location *</label>
     <input type="text" id="edit-incident-location" placeholder="Location" />
     <span class="field-error" id="err-incident-location"></span>
-
     <div class="modal-actions">
       <button class="cancel-btn" onclick="closeModal('modal-incident')">Cancel</button>
       <button class="btn" onclick="saveIncident()">Save</button>
@@ -384,19 +508,15 @@
   <div class="modal">
     <h3>Edit Customer</h3>
     <input type="hidden" id="edit-customer-id" />
-
     <label>Email *</label>
     <input type="text" id="edit-customer-email" placeholder="user@example.com" />
     <span class="field-error" id="err-customer-email"></span>
-
     <label>Phone * (10 digits)</label>
     <input type="text" id="edit-customer-phone" placeholder="9876543210" maxlength="10" />
     <span class="field-error" id="err-customer-phone"></span>
-
     <label>Address *</label>
     <input type="text" id="edit-customer-address" placeholder="Full address" />
     <span class="field-error" id="err-customer-address"></span>
-
     <div class="modal-actions">
       <button class="cancel-btn" onclick="closeModal('modal-customer')">Cancel</button>
       <button class="btn" onclick="saveCustomer()">Save</button>
@@ -409,23 +529,18 @@
   <div class="modal">
     <h3>Edit Officer</h3>
     <input type="hidden" id="edit-officer-id" />
-
     <label>Email *</label>
     <input type="text" id="edit-officer-email" placeholder="officer@pd.gov" />
     <span class="field-error" id="err-officer-email"></span>
-
     <label>Phone * (10 digits)</label>
     <input type="text" id="edit-officer-phone" placeholder="9876543210" maxlength="10" />
     <span class="field-error" id="err-officer-phone"></span>
-
     <label>Location *</label>
     <input type="text" id="edit-officer-location" placeholder="Precinct / Area" />
     <span class="field-error" id="err-officer-location"></span>
-
     <label>Department *</label>
     <input type="text" id="edit-officer-dept" placeholder="e.g. Homicide, Cybercrime" />
     <span class="field-error" id="err-officer-dept"></span>
-
     <div class="modal-actions">
       <button class="cancel-btn" onclick="closeModal('modal-officer')">Cancel</button>
       <button class="btn" onclick="saveOfficer()">Save</button>
@@ -437,7 +552,13 @@
   const BASE = "http://localhost:8000";
   let TOKEN = null;
 
-  // ── Toast ─────────────────────────────────────────────────────────────────
+  // Raw data caches for client-side filtering
+  let allIncidents = [];
+  let allCustomers = [];
+  let allOfficers  = [];
+  let activeDepts  = new Set(); // selected dept chips
+
+  // ── Toast ────────────────────────────────────────────────────────────────
 
   function showToast(msg, type = "success") {
     const existing = document.querySelector(".toast");
@@ -449,125 +570,73 @@
     setTimeout(() => t.remove(), 4000);
   }
 
+  // ── Highlight matching text ───────────────────────────────────────────────
+
+  function hl(text, query) {
+    if (!query || !text) return text ?? "";
+    const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    return String(text).replace(new RegExp(`(${escaped})`, "gi"),
+      '<span class="highlight">$1</span>');
+  }
+
   // ── Validation helpers ────────────────────────────────────────────────────
 
   function setError(id, msg) {
     const el = document.getElementById(id);
     if (el) el.textContent = msg;
-    // highlight the input
     const inputId = id.replace("err-", "edit-").replace(/-(\w+)$/, (_, g) => `-${g}`);
     const input = document.getElementById(inputId);
     if (input) input.classList.toggle("invalid", !!msg);
   }
 
-  function clearErrors(...ids) {
-    ids.forEach(id => setError(id, ""));
-  }
+  function clearErrors(...ids) { ids.forEach(id => setError(id, "")); }
 
-  function isValidEmail(email) {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  }
-
-  function isValidPhone(phone) {
-    return /^\d{10}$/.test(phone);
-  }
+  function isValidEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+  function isValidPhone(p) { return /^\d{10}$/.test(p); }
 
   const VALID_STATUSES = ["initialized", "assigned", "resolved"];
 
   function validateIncident(status, officer_raw, description, location) {
     let valid = true;
-    clearErrors("err-incident-status", "err-incident-officer", "err-incident-desc", "err-incident-location");
-
-    if (!status) {
-      setError("err-incident-status", "Status is required.");
-      valid = false;
-    } else if (!VALID_STATUSES.includes(status.toLowerCase())) {
-      setError("err-incident-status", "Status must be: initialized, assigned, or resolved.");
-      valid = false;
+    clearErrors("err-incident-status","err-incident-officer","err-incident-desc","err-incident-location");
+    if (!status) { setError("err-incident-status","Status is required."); valid = false; }
+    else if (!VALID_STATUSES.includes(status.toLowerCase())) {
+      setError("err-incident-status","Status must be: initialized, assigned, or resolved."); valid = false;
     }
-
-    if (officer_raw) {
-      if (isNaN(parseInt(officer_raw)) || parseInt(officer_raw) <= 0) {
-        setError("err-incident-officer", "Officer ID must be a positive number.");
-        valid = false;
-      }
+    if (officer_raw && (isNaN(parseInt(officer_raw)) || parseInt(officer_raw) <= 0)) {
+      setError("err-incident-officer","Officer ID must be a positive number."); valid = false;
     }
-
     if (!description || description.trim().length < 5) {
-      setError("err-incident-desc", "Description is required (min 5 characters).");
-      valid = false;
+      setError("err-incident-desc","Description is required (min 5 characters)."); valid = false;
     }
-
     if (!location || location.trim().length < 3) {
-      setError("err-incident-location", "Location is required (min 3 characters).");
-      valid = false;
+      setError("err-incident-location","Location is required (min 3 characters)."); valid = false;
     }
-
     return valid;
   }
 
   function validateCustomer(email, phone, address) {
     let valid = true;
-    clearErrors("err-customer-email", "err-customer-phone", "err-customer-address");
-
-    if (!email) {
-      setError("err-customer-email", "Email is required.");
-      valid = false;
-    } else if (!isValidEmail(email)) {
-      setError("err-customer-email", "Enter a valid email address (e.g. user@example.com).");
-      valid = false;
-    }
-
-    if (!phone) {
-      setError("err-customer-phone", "Phone is required.");
-      valid = false;
-    } else if (!isValidPhone(phone)) {
-      setError("err-customer-phone", "Phone must be exactly 10 digits, numbers only.");
-      valid = false;
-    }
-
-    if (!address || address.trim().length < 5) {
-      setError("err-customer-address", "Address is required (min 5 characters).");
-      valid = false;
-    }
-
+    clearErrors("err-customer-email","err-customer-phone","err-customer-address");
+    if (!email) { setError("err-customer-email","Email is required."); valid = false; }
+    else if (!isValidEmail(email)) { setError("err-customer-email","Enter a valid email address."); valid = false; }
+    if (!phone) { setError("err-customer-phone","Phone is required."); valid = false; }
+    else if (!isValidPhone(phone)) { setError("err-customer-phone","Phone must be exactly 10 digits."); valid = false; }
+    if (!address || address.trim().length < 5) { setError("err-customer-address","Address is required (min 5 chars)."); valid = false; }
     return valid;
   }
 
   function validateOfficer(email, phone, location, department) {
     let valid = true;
-    clearErrors("err-officer-email", "err-officer-phone", "err-officer-location", "err-officer-dept");
-
-    if (!email) {
-      setError("err-officer-email", "Email is required.");
-      valid = false;
-    } else if (!isValidEmail(email)) {
-      setError("err-officer-email", "Enter a valid email address.");
-      valid = false;
-    }
-
-    if (!phone) {
-      setError("err-officer-phone", "Phone is required.");
-      valid = false;
-    } else if (!isValidPhone(phone)) {
-      setError("err-officer-phone", "Phone must be exactly 10 digits, numbers only.");
-      valid = false;
-    }
-
-    if (!location || location.trim().length < 3) {
-      setError("err-officer-location", "Location is required (min 3 characters).");
-      valid = false;
-    }
-
-    if (!department || department.trim().length < 2) {
-      setError("err-officer-dept", "Department is required (min 2 characters).");
-      valid = false;
-    }
-
+    clearErrors("err-officer-email","err-officer-phone","err-officer-location","err-officer-dept");
+    if (!email) { setError("err-officer-email","Email is required."); valid = false; }
+    else if (!isValidEmail(email)) { setError("err-officer-email","Enter a valid email address."); valid = false; }
+    if (!phone) { setError("err-officer-phone","Phone is required."); valid = false; }
+    else if (!isValidPhone(phone)) { setError("err-officer-phone","Phone must be exactly 10 digits."); valid = false; }
+    if (!location || location.trim().length < 3) { setError("err-officer-location","Location is required (min 3 chars)."); valid = false; }
+    if (!department || department.trim().length < 2) { setError("err-officer-dept","Department is required (min 2 chars)."); valid = false; }
     return valid;
   }
-
-  // ── Friendly API error messages ───────────────────────────────────────────
 
   function friendlyError(detail, ctx = {}) {
     if (!detail) return "Something went wrong. Please try again.";
@@ -587,34 +656,22 @@
     const password = document.getElementById("password").value.trim();
     const errEl    = document.getElementById("error-msg");
     errEl.style.display = "none";
-
     if (!username || !password) {
-      errEl.style.display = "block";
-      errEl.textContent = "Username and password are required.";
-      return;
+      errEl.style.display = "block"; errEl.textContent = "Username and password are required."; return;
     }
-
     try {
       const res = await fetch(`${BASE}/admin/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password })
       });
-
-      if (!res.ok) {
-        errEl.style.display = "block";
-        errEl.textContent = "Invalid credentials.";
-        return;
-      }
-
+      if (!res.ok) { errEl.style.display = "block"; errEl.textContent = "Invalid credentials."; return; }
       const data = await res.json();
       TOKEN = data.access_token;
       document.getElementById("login-screen").style.display = "none";
       document.getElementById("dashboard").style.display = "block";
       loadIncidents();
-    } catch (e) {
-      errEl.style.display = "block";
-      errEl.textContent = "Cannot connect to server. Is it running?";
+    } catch {
+      errEl.style.display = "block"; errEl.textContent = "Cannot connect to server. Is it running?";
     }
   }
 
@@ -629,9 +686,7 @@
 
   function switchTab(name) {
     const names = ["incidents", "customers", "officers"];
-    document.querySelectorAll(".tab").forEach((t, i) => {
-      t.classList.toggle("active", names[i] === name);
-    });
+    document.querySelectorAll(".tab").forEach((t, i) => t.classList.toggle("active", names[i] === name));
     document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
     document.getElementById(`section-${name}`).classList.add("active");
     if (name === "incidents") loadIncidents();
@@ -639,42 +694,63 @@
     if (name === "officers")  loadOfficers();
   }
 
-  // ── Generic API call ──────────────────────────────────────────────────────
-
   async function apiCall(method, path, body = {}) {
     const res = await fetch(`${BASE}${path}`, {
-      method,
-      headers: { "Content-Type": "application/json" },
+      method, headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ token: TOKEN, ...body })
     });
     const data = await res.json();
     return { ok: res.ok, status: res.status, data };
   }
 
-  // ── Incidents ─────────────────────────────────────────────────────────────
+  // ── INCIDENTS ─────────────────────────────────────────────────────────────
 
   async function loadIncidents() {
     document.getElementById("incidents-table").innerHTML = '<div class="loading">Loading...</div>';
+    document.getElementById("count-incidents").innerHTML = "";
     const { ok, data } = await apiCall("POST", "/admin/incidents");
     if (!ok || !Array.isArray(data)) {
-      document.getElementById("incidents-table").innerHTML = '<div class="loading">Failed to load incidents.</div>';
-      return;
+      document.getElementById("incidents-table").innerHTML = '<div class="loading">Failed to load incidents.</div>'; return;
     }
-    if (data.length === 0) {
-      document.getElementById("incidents-table").innerHTML = '<div class="loading">No incidents found.</div>';
-      return;
+    allIncidents = data;
+    filterIncidents();
+  }
+
+  function filterIncidents() {
+    const q      = document.getElementById("search-incidents").value.trim().toLowerCase();
+    const status = document.getElementById("filter-incident-status").value.toLowerCase();
+
+    const filtered = allIncidents.filter(i => {
+      const matchQ = !q || (
+        (i.location    || "").toLowerCase().includes(q) ||
+        (i.description || "").toLowerCase().includes(q) ||
+        String(i.id).includes(q) ||
+        String(i.customer_id || "").includes(q)
+      );
+      const matchS = !status || (i.status || "").toLowerCase() === status;
+      return matchQ && matchS;
+    });
+
+    document.getElementById("count-incidents").innerHTML =
+      `Showing <span>${filtered.length}</span> of ${allIncidents.length} incidents`;
+
+    if (filtered.length === 0) {
+      document.getElementById("incidents-table").innerHTML =
+        '<div class="loading">No incidents match your search.</div>'; return;
     }
-    const rows = data.map(i => `
+
+    const rows = filtered.map(i => `
       <tr>
         <td>${i.id}</td>
         <td>${i.customer_id ?? "-"}</td>
         <td>${i.officer_id ?? "Unassigned"}</td>
         <td><span class="status-badge status-${i.status}">${i.status}</span></td>
-        <td title="${i.description ?? ''}">${i.description ?? "-"}</td>
-        <td>${i.location ?? "-"}</td>
+        <td title="${i.description ?? ''}">${hl(i.description, q) || "-"}</td>
+        <td>${hl(i.location, q) || "-"}</td>
         <td>${i.created_at ? new Date(i.created_at).toLocaleString() : "-"}</td>
         <td><button class="edit-btn" onclick='openIncidentModal(${JSON.stringify(i)})'>Edit</button></td>
       </tr>`).join("");
+
     document.getElementById("incidents-table").innerHTML = `
       <table>
         <thead><tr>
@@ -701,51 +777,60 @@
     const officer_raw = document.getElementById("edit-incident-officer").value.trim();
     const description = document.getElementById("edit-incident-desc").value.trim();
     const location    = document.getElementById("edit-incident-location").value.trim();
-
     if (!validateIncident(status, officer_raw, description, location)) return;
-
     const officer_id = officer_raw ? parseInt(officer_raw) : null;
-
     const { ok, data } = await apiCall("PUT", "/admin/incidents", {
-      incident_id: id,
-      status,
-      ...(officer_id !== null && { officer_id }),
-      description,
-      location
+      incident_id: id, status, ...(officer_id !== null && { officer_id }), description, location
     });
-
-    if (!ok) {
-      showToast(friendlyError(data.detail, { officer_id: officer_raw }), "error");
-      return;
-    }
-
+    if (!ok) { showToast(friendlyError(data.detail, { officer_id: officer_raw }), "error"); return; }
     showToast("Incident updated successfully", "success");
     closeModal("modal-incident");
     loadIncidents();
   }
 
-  // ── Customers ─────────────────────────────────────────────────────────────
+  // ── CUSTOMERS ─────────────────────────────────────────────────────────────
 
   async function loadCustomers() {
     document.getElementById("customers-table").innerHTML = '<div class="loading">Loading...</div>';
+    document.getElementById("count-customers").innerHTML = "";
     const { ok, data } = await apiCall("POST", "/admin/customers");
     if (!ok || !Array.isArray(data)) {
-      document.getElementById("customers-table").innerHTML = '<div class="loading">Failed to load customers.</div>';
-      return;
+      document.getElementById("customers-table").innerHTML = '<div class="loading">Failed to load customers.</div>'; return;
     }
-    if (data.length === 0) {
-      document.getElementById("customers-table").innerHTML = '<div class="loading">No customers found.</div>';
-      return;
+    allCustomers = data;
+    filterCustomers();
+  }
+
+  function filterCustomers() {
+    const q = document.getElementById("search-customers").value.trim().toLowerCase();
+
+    const filtered = allCustomers.filter(c =>
+      !q || (
+        (c.username || "").toLowerCase().includes(q) ||
+        (c.email    || "").toLowerCase().includes(q) ||
+        (c.phone    || "").toLowerCase().includes(q) ||
+        (c.address  || "").toLowerCase().includes(q)
+      )
+    );
+
+    document.getElementById("count-customers").innerHTML =
+      `Showing <span>${filtered.length}</span> of ${allCustomers.length} customers`;
+
+    if (filtered.length === 0) {
+      document.getElementById("customers-table").innerHTML =
+        '<div class="loading">No customers match your search.</div>'; return;
     }
-    const rows = data.map(c => `
+
+    const rows = filtered.map(c => `
       <tr>
         <td>${c.id}</td>
-        <td>${c.username}</td>
-        <td>${c.email}</td>
-        <td>${c.phone}</td>
-        <td>${c.address}</td>
+        <td>${hl(c.username, q)}</td>
+        <td>${hl(c.email, q)}</td>
+        <td>${hl(c.phone, q)}</td>
+        <td>${hl(c.address, q)}</td>
         <td><button class="edit-btn" onclick='openCustomerModal(${JSON.stringify(c)})'>Edit</button></td>
       </tr>`).join("");
+
     document.getElementById("customers-table").innerHTML = `
       <table>
         <thead><tr>
@@ -769,47 +854,99 @@
     const email   = document.getElementById("edit-customer-email").value.trim();
     const phone   = document.getElementById("edit-customer-phone").value.trim();
     const address = document.getElementById("edit-customer-address").value.trim();
-
     if (!validateCustomer(email, phone, address)) return;
-
-    const { ok, data } = await apiCall("PUT", "/admin/customers", {
-      customer_id: id, email, phone, address
-    });
-
-    if (!ok) {
-      showToast(friendlyError(data.detail), "error");
-      return;
-    }
-
+    const { ok, data } = await apiCall("PUT", "/admin/customers", { customer_id: id, email, phone, address });
+    if (!ok) { showToast(friendlyError(data.detail), "error"); return; }
     showToast("Customer updated successfully", "success");
     closeModal("modal-customer");
     loadCustomers();
   }
 
-  // ── Officers ──────────────────────────────────────────────────────────────
+  // ── OFFICERS ──────────────────────────────────────────────────────────────
 
   async function loadOfficers() {
     document.getElementById("officers-table").innerHTML = '<div class="loading">Loading...</div>';
+    document.getElementById("count-officers").innerHTML = "";
+    document.getElementById("dept-chips").innerHTML = "";
+    activeDepts.clear();
     const { ok, data } = await apiCall("POST", "/admin/officers");
     if (!ok || !Array.isArray(data)) {
-      document.getElementById("officers-table").innerHTML = '<div class="loading">Failed to load officers.</div>';
-      return;
+      document.getElementById("officers-table").innerHTML = '<div class="loading">Failed to load officers.</div>'; return;
     }
-    if (data.length === 0) {
-      document.getElementById("officers-table").innerHTML = '<div class="loading">No officers found.</div>';
-      return;
+    allOfficers = data;
+    buildDeptChips();
+    filterOfficers();
+  }
+
+ function buildDeptChips() {
+  const depts = [...new Set(allOfficers.map(o => o.department).filter(Boolean))].sort();
+  const wrap  = document.getElementById("dept-chips");
+  if (depts.length === 0) { wrap.innerHTML = ""; return; }
+
+  wrap.innerHTML = `
+    <div class="dept-chip active" data-dept="__all__" onclick="toggleDept('__all__')">All Departments</div>
+    ${depts.map((d, i) => `
+      <div class="dept-chip" data-dept="${i}" onclick="toggleDept('${d.replace(/'/g, "\\'")}')">${d}</div>
+    `).join("")}`;
+}
+
+function toggleDept(dept) {
+  if (dept === "__all__") {
+    activeDepts.clear();
+    document.querySelectorAll(".dept-chip").forEach(c => c.classList.remove("active"));
+    document.querySelector(".dept-chip[data-dept='__all__']").classList.add("active");
+  } else {
+    document.querySelector(".dept-chip[data-dept='__all__']").classList.remove("active");
+    if (activeDepts.has(dept)) {
+      activeDepts.delete(dept);
+    } else {
+      activeDepts.add(dept);
     }
-    const rows = data.map(o => `
+    // re-render chip states based on activeDepts
+    document.querySelectorAll(".dept-chip:not([data-dept='__all__'])").forEach(c => {
+      const chipDept = allOfficers.find(o => o.department === c.textContent)?.department;
+      c.classList.toggle("active", activeDepts.has(chipDept));
+    });
+    if (activeDepts.size === 0) {
+      document.querySelector(".dept-chip[data-dept='__all__']").classList.add("active");
+    }
+  }
+  filterOfficers();
+}
+  function filterOfficers() {
+    const q = document.getElementById("search-officers").value.trim().toLowerCase();
+
+    const filtered = allOfficers.filter(o => {
+      const matchQ = !q || (
+        (o.username     || "").toLowerCase().includes(q) ||
+        (o.email        || "").toLowerCase().includes(q) ||
+        (o.badge_number || "").toLowerCase().includes(q) ||
+        (o.location     || "").toLowerCase().includes(q)
+      );
+      const matchD = activeDepts.size === 0 || activeDepts.has(o.department);
+      return matchQ && matchD;
+    });
+
+    document.getElementById("count-officers").innerHTML =
+      `Showing <span>${filtered.length}</span> of ${allOfficers.length} officers`;
+
+    if (filtered.length === 0) {
+      document.getElementById("officers-table").innerHTML =
+        '<div class="loading">No officers match your search.</div>'; return;
+    }
+
+    const rows = filtered.map(o => `
       <tr>
         <td>${o.id}</td>
-        <td>${o.username}</td>
-        <td>${o.email}</td>
-        <td>${o.badge_number}</td>
-        <td>${o.department}</td>
-        <td>${o.phone}</td>
-        <td>${o.location}</td>
+        <td>${hl(o.username, q)}</td>
+        <td>${hl(o.email, q)}</td>
+        <td>${hl(o.badge_number, q)}</td>
+        <td>${o.department ?? "-"}</td>
+        <td>${hl(o.phone, q)}</td>
+        <td>${o.location ?? "-"}</td>
         <td><button class="edit-btn" onclick='openOfficerModal(${JSON.stringify(o)})'>Edit</button></td>
       </tr>`).join("");
+
     document.getElementById("officers-table").innerHTML = `
       <table>
         <thead><tr>
@@ -836,18 +973,9 @@
     const phone      = document.getElementById("edit-officer-phone").value.trim();
     const location   = document.getElementById("edit-officer-location").value.trim();
     const department = document.getElementById("edit-officer-dept").value.trim();
-
     if (!validateOfficer(email, phone, location, department)) return;
-
-    const { ok, data } = await apiCall("PUT", "/admin/officers", {
-      officer_id: id, email, phone, location, department
-    });
-
-    if (!ok) {
-      showToast(friendlyError(data.detail), "error");
-      return;
-    }
-
+    const { ok, data } = await apiCall("PUT", "/admin/officers", { officer_id: id, email, phone, location, department });
+    if (!ok) { showToast(friendlyError(data.detail), "error"); return; }
     showToast("Officer updated successfully", "success");
     closeModal("modal-officer");
     loadOfficers();
@@ -855,18 +983,15 @@
 
   // ── Modal helpers ─────────────────────────────────────────────────────────
 
-  function closeModal(id) {
-    document.getElementById(id).classList.remove("open");
-  }
+  function closeModal(id) { document.getElementById(id).classList.remove("open"); }
 
   document.querySelectorAll(".modal-overlay").forEach(m => {
     m.addEventListener("click", e => { if (e.target === m) m.classList.remove("open"); });
   });
 
-  // ── Phone: digits only while typing ──────────────────────────────────────
-  ["edit-customer-phone", "edit-officer-phone"].forEach(id => {
+  ["edit-customer-phone","edit-officer-phone"].forEach(id => {
     document.getElementById(id).addEventListener("input", function() {
-      this.value = this.value.replace(/\D/g, "").slice(0, 10);
+      this.value = this.value.replace(/\D/g,"").slice(0,10);
     });
   });
 </script>
